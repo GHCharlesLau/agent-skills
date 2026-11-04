@@ -1,0 +1,23 @@
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Compiled / downloaded tool binaries (provisioned by install scripts)
+skills/zotero-use/bin/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Local test artifacts
+test-artifacts/
+
+# Keep per-skill license + notices
+!LICENSE
+!NOTICE.md

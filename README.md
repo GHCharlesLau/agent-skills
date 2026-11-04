@@ -14,7 +14,7 @@ Codex, Cursor, OpenCode, and cc-switch**.
 | Skill | Description | Origin |
 |---|---|---|
 | `agent-reach` | Multi-platform research / search skill (15 platforms: X, xiaohongshu, bilibili, Reddit, V2EX, GitHub, YouTube, RSS, …) with backend routing | Original |
-| `source-command-travel-guide` | 自驾游攻略生成器 — road-trip itinerary generator (migrated from a source command) | Original |
+| `travel-guide` | 自驾游攻略生成器 — immersive interactive road-trip guide: clear route-chain view, interactive single-page HTML (day stepper, linked views), attraction photo galleries | Original |
 | `paper-search` | Literature search across OpenAlex / arXiv / PubMed / Crossref, dedup & relevance filtering, exports BibTeX, imports into a Zotero subcollection | Original |
 | `sync-docs` | Synchronize content across slides, speaker script, and manuscript; audits stale references and compiles to PDF | Original |
 | `open-kimi-ppt` | Create/edit/export presentations using the PPTD format and a local PPTX writer | Third-party (MIT) |
@@ -39,7 +39,7 @@ agent-skills/
 │   └── install.sh              # macOS / Linux
 └── skills/
     ├── agent-reach/            # SKILL.md + references/
-    ├── source-command-travel-guide/
+    ├── travel-guide/           # SKILL.md (interactive road-trip guide)
     ├── paper-search/           # SKILL.md + scripts/
     ├── sync-docs/
     ├── open-kimi-ppt/          # SKILL.md + reference/ + scripts/ + tests/

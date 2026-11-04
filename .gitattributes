@@ -1,0 +1,17 @@
+# Normalize line endings across platforms
+* text=auto
+
+# Scripts and docs should stay LF
+*.md   text eol=lf
+*.sh   text eol=lf
+*.yml  text eol=lf
+*.py   text eol=lf
+*.json text eol=lf
+
+# PowerShell works best with CRLF on Windows
+*.ps1 text eol=crlf
+
+# Binary / generated files
+*.png binary
+*.pptx binary
+*.pdf binary

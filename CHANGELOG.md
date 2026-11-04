@@ -5,6 +5,12 @@ All notable changes to this skill collection are recorded here, following
 
 ## [Unreleased]
 
+### Changed
+
+- `paper-search`: updated to the latest version — added `references/`
+  (`pdf-sources.md`, `zotero-filing.md`) and expanded `SKILL.md` and
+  `journals.csv`.
+
 ### Added
 
 - Initial public release of the `agent-skills` collection:

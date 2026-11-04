@@ -8,6 +8,18 @@ disable-model-invocation: false
 
 Turn a vague thought or a few keywords into a short list of genuinely relevant papers, with a reason attached to each one.
 
+> **One copy only.** This directory is the only real copy. Every agent reaches it
+> through a directory junction, so edit here and every entry point follows:
+>
+> - `~/.agents/skills/paper-search` — DSH user root (rank 500)
+> - `~/.config/opencode/skills/paper-search` — OpenCode global
+> - `~/.codex/skills/paper-search` — Codex
+> - `~/.claude/skills/paper-search` — Claude Code
+> - `D:\ProgramData\agent-workspace\opencode-workspace\agent-skills\skills\paper-search` — that workspace
+>
+> Never copy the bundle into another root: copies drift, and a skill only loads
+> from a root its host actually scans.
+
 ## Quick start
 
 ```bash
@@ -210,6 +222,18 @@ Three backends, chosen automatically:
 Before creating anything it searches the library by DOI. A paper already in the library is **added to the target collection instead of duplicated**, which matters in a large library. It creates the collection if the name does not exist, then attaches any matching PDF from `--pdf-dir` as a child item.
 
 Stage 3 writes to the user's library: run `--dry-run`, state the collection name and item count, and get a yes before the real import. Never import without being asked.
+
+## Filing records properly
+
+The `zotero` subcommand is fine for bulk import. When every record will be
+cited in a manuscript, read [references/zotero-filing.md](references/zotero-filing.md)
+first: APA sentence case for article titles, HTML-entity decoding, exact-DOI
+dedupe, and the local-API calls for items and child PDFs.
+
+When `fetch` reports `--` (no open-access copy) or `!!` (tried and failed),
+follow [references/pdf-sources.md](references/pdf-sources.md): legal sources
+only, one stored copy, CUHK Easy Access lanes, and an honest list of what is
+still missing.
 
 ## Snowball
 

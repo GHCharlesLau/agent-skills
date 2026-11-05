@@ -1,92 +1,151 @@
 ---
 name: "travel-guide"
 description: >-
-  生成沉浸式、可交互的自驾游攻略。核心亮点：清晰的串联式路线、可交互的单页 HTML、以及
-  景点图片画廊。输出结构化 Markdown 主文档 + 自包含交互式 HTML 单页（日切换、路线三重视图、
-  视图联动、图片 Lightbox）。Generate immersive, interactive road-trip guides with a crystal-clear
-  sightseeing path (route-chain view, SVG map, Leaflet real map), interactive single-page HTML
-  (day stepper, linked views, expandable cards, filters) and beautiful attraction photo galleries
-  (lightbox, hover zoom, multi-source fallback). Use when the user asks to plan a road trip /
-  travel itinerary / 自驾游攻略 / 出行攻略 / 旅游攻略 / route planning.
+  生成沉浸式、可交互的自驾游攻略（含徒步路书）。核心亮点：清晰的串联式路线、三重视图（串联图 /
+  SVG 示意图 / Leaflet 真实地图，多瓦片源自动回退 + 离线提示）、可交互单页 HTML（日切换、
+  视图联动、可展开卡片、互动预算、行前清单）、景点实拍图片画廊（Lightbox、多源采集与署名），
+  以及**单文件离线分享版**（图片 base64 内嵌，发给队友即可跨设备打开）。
+  Generate immersive, interactive self-drive / road-trip guides with a crystal-clear route chain,
+  three route views (chain / SVG / Leaflet with multi-tile fallback), hiking trail details with
+  elevation profiles, real on-location photos with attribution, and an offline single-file
+  shareable HTML export. Use when the user asks to plan a road trip / travel itinerary /
+  hiking weekend / 自驾游攻略 / 徒步攻略 / 出行攻略 / 旅游攻略 / 路线规划.
 ---
 
 # travel-guide
 
-自驾游攻略生成器：你是一位资深的旅行规划师兼前端设计师。根据用户需求，生成结构化、高质量的自驾游攻略，输出 **Markdown 主文档** 与配套的 **交互式可视化 HTML 导出页**。
+自驾游 / 徒步攻略生成器。你是一位资深旅行规划师 + 前端设计师：输出**结构化 Markdown**、
+**可交互 HTML**，以及**一个能直接发给别人的单文件分享版**。
 
 ## 输出物
 
 | 文件 | 用途 | 说明 |
 |------|------|------|
-| `{目的地}-自驾游攻略.md` | 主输出 | 完整规划文档，可读、可编辑、可打印 |
-| `{目的地}-自驾游攻略.html` | 可视化导出 | 自包含交互式单页 HTML，可分享、可在手机打开 |
+| `{目的地}-自驾游攻略.md` | 主文档 | 可读、可编辑、可打印，现场对照用 |
+| `{目的地}-自驾游攻略.html` | 交互版 | 引用 `images/`，画质最好，方便继续改 |
+| `{目的地}-自驾游攻略-分享版.html` | **发人用** | 图片全内嵌，**单文件离线可用**（见 `references/shareable.md`） |
+| `route.svg` | 路线示意图 | Markdown 引用，与 HTML 内嵌版一致 |
+| `images/` + `credits.json` | 实拍配图 | 本地化存储 + 署名信息 |
 
 ## 工作流
 
-开始前用 **TaskCreate** 为每个 Phase 创建任务，便于跟踪进度。
+每个 Phase 完成后自检再进入下一阶段。**P0（图片 / 地图 / 分享版）不通过，不算完成。**
 
-### Phase 1: 交互式需求收集
+### Phase 0 — 环境探测（先做，省掉一半返工）
 
-分析用户初始输入，识别缺失关键信息。使用 **AskUserQuestion** 工具就以下维度分批确认（每批最多 4 个问题，避免一次问太多）：
+```bash
+python scripts/probe_sources.py
+```
 
-**必填项**（缺失任一即问）：
-- 出发地、目的地
-- 出行日期与天数
-- 同行人数与关系（影响住宿和节奏）
-- 预算范围（总预算 / 人均 / 住宿档位）
+- 确认哪些**图片源**、**瓦片源**、CDN、OSRM 当前可用
+- 国内网络典型结果：Pexels / B站 可用，Wikimedia / OSM / CARTO 常超时，Unsplash 搜索 API 401
+- 把结果记下来：后面对图片源、底图源的顺序就按探测结果排
 
-**选项项**（默认合理时不问）：
-- 节奏偏好：宽松 / 适中 / 紧凑
-- 住宿类型：经济型 / 舒适型 / 高端
-- 出行偏好：自然风光 / 人文历史 / 美食 / 综合
-- 特殊需求：带老人小孩、宠物、特殊饮食等
-- 输出形式：仅 MD / MD + HTML
+> 不探测直接写 Unsplash + Carto，结果就是两轮"图片看不到 / 地图打不开"的返工。
 
-### Phase 2: 路线规划与里程验证
+### Phase 1 — 需求收集
 
-1. **景点研究**：WebSearch 查询候选景点的门票、营业时间、推荐游玩时长
-2. **路线优化**：按地理方位排序，不走回头路；每日车程建议 ≤ 4-5 小时
-3. **里程验证（必须）**：用 OSRM 路由 API 验证每段车程，禁止凭感觉估算（误差可达 50%+）
+分批（每批 ≤4 问）确认，避免一次问太多：
+
+**必填**：出发地 / 目的地 / 日期与天数 / 人数与关系 / 预算（总或人均）/ 出行方式（自驾？车型？）
+**选填**（有合理默认就不问）：节奏、住宿档位、偏好（自然/人文/美食）、特殊需求（老人小孩/宠物/忌口）、
+输出形式（仅 MD 还是 MD+HTML）、是否徒步（线路强度偏好）
+
+徒步场景额外问：**单日最大徒步距离 / 爬升接受度 / 是否有户外经验**。
+
+### Phase 2 — 路线规划 + OSRM 验证（硬性）
+
+1. 研究候选景点（门票、开放时间、建议时长）
+2. 按地理方位排序，不走回头路，单日车程 ≤ 4–5h
+3. **每段路必须 OSRM 验证**，禁止直线估算（山区误差可达 50%+）
+
+```bash
+python scripts/osrm_verify.py legs.json          # 模板见 scripts/legs.example.json
+```
+
+- `legs.json` 里每段写 `{label, from:[lon,lat], to:[lon,lat]}`
+- 输出 km / 时长 / +25% 缓冲；实际驾驶按 +25%–30% 规划
+- 把结果表**原样**用于串联图、SVG 标签、日程、预算（一处改，全文同步）
+
+4. 每个景点标注**到达/离开时间窗**（含游玩时长）
+
+### Phase 3 — 逐日行程编排
+
+时间轴 / 车程 / 游玩 / 用餐 / 住宿。逐日校验：`出发 + 车程 + 游玩 = 到达`，无矛盾。
+
+### Phase 4 — 景点与徒步研究
+
+每个景点：简介（1–2 句）、门票、最佳路线、亮点、最佳时段、注意事项。
+**若是徒步**：另按 `references/hiking.md` 收集分段路书、累计爬升、最高海拔、导航点、撤退方案、信号/补水/现金风险。
+
+### Phase 5 — Plan 审批
+
+把完整规划（行程表 / 逐日 / 住宿美食 / 预算 / 实施方案）写入 plan 文件，等用户确认后再动手写页面。
+
+### Phase 6 — 坐标验证
+
+- 建坐标表：`名称 | 经度 | 纬度 | 来源`
+- 只用**点坐标**（高德 POI / Wikipedia 点 / OSM node）；区县坐标是范围中心，不能用
+- SVG 映射：
+  ```
+  svg_x = (lon - min_lon) / (max_lon - min_lon) * width  + offset_x
+  svg_y = (max_lat - lat) / (max_lat - min_lat) * height + offset_y
+  ```
+- ⚠️ **坐标系**：高德/腾讯是 GCJ-02，Esri/OSM/Wikipedia 是 WGS84。混用会偏移 300–700m（见 `references/maps.md` §4）
+
+### Phase 7 — Markdown 攻略
+
+按下方模板写 `{目的地}-自驾游攻略.md`。有徒步就加「徒步路线详解」章节，末尾固定加「交付文件与分享方式」。
+
+### Phase 8 — 图片采集（与 Phase 7 可并行）
+
+按 `references/images.md`：
+
+1. 中国景点优先 **B 站实拍封面**（拍摄地=景点，最对得上）：
    ```bash
-   curl -s "https://router.project-osrm.org/route/v1/driving/{lon1},{lat1};{lon2},{lat2}?overview=false"
-   # 返回 routes[0].distance (米) 和 routes[0].duration (秒)
+   python scripts/download_bili_covers.py --search "梅子坪古道" -n 10
+   python scripts/download_bili_covers.py --manifest images.json --out-dir images
    ```
-   - OSRM 为理想路况，实际驾驶加 **25%-30% 缓冲**
-   - 批量查询注意间隔，避免限流
-4. **输出路线方案**：文本表格展示行程概览，里程和时间必须来自路由验证
-5. 为每个景点标注**建议到达/离开时间窗口**（含游玩时长），供时间轴编排使用
+2. Pexels / Unsplash 补充通用风光（先探测可用性）
+3. 全部落本地 `images/`，**禁止热链**
+4. **每张图用 `read` 工具亲自看一遍**，确认与景点描述对应
+5. 生成 `credits.json`，图注写 `景点 · 角度 · 图：B站 @UP主`
 
-### Phase 3: 详细行程编排
+### Phase 9 — HTML 生成
 
-为每天编排：时间轴 / 车程信息 / 游玩时长 / 用餐安排 / 住宿安排。
-**逐日校验**：出发时间 + 实际车程 = 到达时间，确保无矛盾。
+结构、交互、视觉规范见 `references/html-spec.md`；三视图细节见
+`references/svg-map.md`（SVG）与 `references/maps.md`（Leaflet）。
 
-### Phase 4: 景点信息补充研究
+必须包含：Hero、三视图路线、逐日卡片（**默认展开**）、徒步详解（含海拔剖面）、
+景点画廊 + 灯箱、住宿、美食、互动预算、贴士 + 行前清单、参考、页脚。
 
-对每个景点 WebSearch：简介、门票、最佳游览路线、特色亮点（1-2 句话）、注意事项。
-额外收集（用于图片展示）：
-- 景点标志性拍摄点 / 最佳观赏时段（日出、日落、夜景、季节限定）
-- 可用的高质量图片素材（见 Phase 8 图片策略）
+### Phase 10 — 分享版打包
 
-### Phase 5: Plan 模式审批
+```bash
+python scripts/build_shareable.py \
+  --src "{目的地}-自驾游攻略.html" \
+  --out "{目的地}-自驾游攻略-分享版.html"
+```
 
-使用 **EnterPlanMode** 将完整规划写入 plan 文件（行程概览表 / 逐日安排 / 住宿美食 / 预算 / 实施方案）。等待用户审批后进入实施阶段。
+- 图片 → 900px（Hero 1400px）JPEG q82 → base64 内嵌
+- 典型输出 3–7MB，单文件离线可看
+- 详见 `references/shareable.md`
 
-### Phase 6: 地理坐标验证
+### Phase 11 — QA Gate（不通过不交付）
 
-1. WebSearch 查询每个景点/城市的近似经纬度（出发地、目的地均不可遗漏）
-2. 建立坐标表（纬度 N、经度 E）
-3. 映射到 SVG 坐标系：
-   ```
-   svg_x = (lon - min_lon) / (max_lon - min_lon) * map_width + offset_x
-   svg_y = (max_lat - lat) / (max_lat - min_lat) * map_height + offset_y
-   ```
-4. 同地级市的区县方位可能完全不同，距离可能很远，**不能凭感觉放置**
-5. 记录每个景点的**同城/相邻分组**信息（用于路线串联图与地图分组配色）
+逐条跑 `references/qa.md`。至少覆盖：
 
-### Phase 7: 生成 Markdown 攻略
+1. 浏览器打开，控制台 **0 error**
+2. **破图 = 0**；每张图与景点对应
+3. 地图瓦片加载 ≥ 8，折线数正确，离线有提示
+4. SVG **文字/节点 0 重叠**（脚本检测，不靠肉眼）
+5. Day 切换 / 三视图联动 / 筛选 / 预算 / 清单 / 灯箱全部可用
+6. 分享版单独拷到无 `images/` 的目录仍完整
+7. Markdown 与 HTML 里程数字完全一致（grep 全文）
 
-写入 `{目的地}-自驾游攻略.md`，结构如下（章节顺序固定，可读性优先）：
+---
+
+## Markdown 模板
 
 ````markdown
 # {目的地}自驾游攻略
@@ -104,240 +163,103 @@ description: >-
 
 ### 行程串联图
 ```text
-[出发地] --2.5h/198km--> [景点A] --1h/40km--> [景点B] --30min/15km--> [住宿]
+[出发地] --4h/280km--> [景点A] --1h/61km--> [住宿]
 ```
-（逐日列出，站点之间标注实际车程与里程，必须与 OSRM 验证结果一致）
+（与 OSRM 结果一致）
 
 ### 行程示意图
 ![路线图](route.svg)
 
 ### 路线里程表
 | 日程 | 日期 | 起点 → 终点 | 里程 | 预计车程 | 住宿地 |
-|------|------|------------|------|---------|--------|
 
 ## 逐日行程
 
 ### Day 1: 日期 - 主题
-
 **时间轴**
 | 时间 | 行程 | 备注 |
-|------|------|------|
-| 08:00 | 出发 | ... |
-| 10:30 | 抵达 XX 景点 | 车程 XX km |
 
-**住宿**
-- 推荐：XX 酒店
-- 价格：XX 元/晚（参考价）
+**住宿** / **美食推荐**
 
-**美食推荐**
-- 早餐 / 午餐 / 晚餐
+## 徒步路线详解（有徒步时）
+
+### 路线概览
+| 里程 | 累计爬升 | 最高海拔 | 用时 | 难度 | 门票 |
+
+### 分段路书
+| 分段 | 起 → 止 | 里程 | 累计 | 爬升 | 用时 | 路况与导航 |
+
+### 海拔剖面
+（文字描述 + HTML 内联 SVG）
+
+### 安全与撤退
+信号盲区 / 补水 / 现金 / 天气预案 / 撤退点 / 最晚下撤时间
 
 ## 景点详情
-
 ### 景点名
-- **位置**：XX 市 XX 区
-- **门票**：XX 元
-- **游玩时长**：XX 小时
-- **亮点**：...
-- **最佳观赏时段**：日出 / 日落 / 夜景 / 季节
+- **位置** / **门票** / **游玩时长** / **亮点** / **最佳时段**
 - **购票**：[携程]() [美团]() [飞猪]()
 
-![景点图](image-url)
+![景点图](images/xxx.jpg)
 
 ## 住宿推荐
-| 日期 | 住宿地 | 推荐酒店 | 价格区间 |
-
 ## 美食推荐
-### 地区
-- 餐厅名：特色菜
-
 ## 预算估算
-| 项目 | 金额 | 备注 |
-|------|------|------|
-| 油费 | | 总里程 × 油价 / 油耗 |
-| 门票 | | ... |
-| 住宿 | | ... |
-| 餐饮 | | ... |
-| 其他 | | ... |
-| **合计** | | 人均 XX 元 |
+## 出行贴士（含行前清单）
+## 交付文件与分享方式
 
-## 出行贴士
-- **交通**：山区路段、限速提醒
-- **装备**：根据季节
-- **天气**：参考预报
-- **应急**：报警、救援电话
+| 文件 | 用途 | 说明 |
+|------|------|------|
+| `...html` | 本地编辑版 | 需与 `images/` 同目录 |
+| `...-分享版.html` | 发给队友 | 单文件、离线可用 |
+
+> 分享时只发「分享版」这一个文件；地图瓦片仍需联网，无网时请看「行程示意图」。
 
 ## 参考资料
-1. 景点票务官方信息
-2. 图片来源
-3. 路线规划参考
+1. 景点信息 2. 坐标来源 3. OSRM 4. 天气 5. 图片来源与版权
 ````
-
-### Phase 8: 生成交互式 HTML 可视化页面
-
-基于 Markdown 内容创建自包含单页 HTML 文件（`{目的地}-自驾游攻略.html`），所有 CSS 内联，无外部依赖（除 CDN 字体与 Leaflet）。
-
-**设计原则**（遵循 frontend-design skill）：
-- 大胆、与旅行主题匹配的审美方向
-- 每次生成都应有独特的视觉风格，禁止模板化
-- 禁止使用通用 AI 风格（Inter/Roboto 字体、紫色渐变、模板布局）
-
-**外部依赖（仅限以下）**：
-- Google Fonts（最多 2 个：一个展示字体 + 一个正文字体）
-- Leaflet.js 1.9.x（`leaflet.css` + `leaflet.js` via unpkg CDN）
-
-**页面结构**（必须包含所有章节）：
-1. **Hero**：全幅目的地主图 + 渐变遮罩、标题、副标题（日期+天数+出发地）、关键数据（景点数/总里程/人均预算）、粘性导航
-2. **路线总览**：三重视图切换 —— **路线串联图**（清晰直观）+ **SVG 行程示意图** + **Leaflet 真实地图**
-3. **逐日行程**：时间轴样式，可展开卡片，支持日切换
-4. **景点详情**：卡片网格，含**图片画廊**/门票/亮点/最佳观赏时段/购票外链
-5. **住宿推荐**：按天分组卡片
-6. **美食推荐**：按地区分组
-7. **预算估算**：互动式可视化汇总卡片（可勾选类别动态重算）
-8. **出行贴士**：图标 + 文字网格，附**出行前清单**（可勾选）
-9. **参考资料**：分类列出信息来源
-10. **页脚**：结语和免责声明
 
 ---
 
-#### A. 路线三重视图（路线清晰优先）
+## 硬约束（不可妥协）
 
-目标是让「怎么走」一目了然，三重视图缺一不可：
+1. **里程必须 OSRM 验证**，禁止估算；全文档同一数字
+2. **坐标必须点坐标**，区县范围坐标不算；注意 GCJ-02 / WGS84 不能混
+3. **图片必须与景点对应**，且落到本地 `images/`（分享版内嵌）
+4. **地图必须多源回退 + 看门狗**，禁止单一 Carto/OSM
+5. **SVG 必须 0 重叠**（脚本验证）
+6. **逐日卡片默认展开**
+7. **localStorage 全程 try/catch**，地图初始化整体 try/catch
+8. **必须产出分享版**，并单独拷目录验证
+9. 社媒图片不可热链（防盗链），只能下载到本地并署名
+10. 每张图有图注与来源；非实景图必须标"示意"
+11. 徒步攻略必须有撤退方案与最晚下撤时间
+12. 山区路段标注驾驶注意（会车、雾、落石、夜间）
 
-**1. 路线串联图（Route Chain，默认视图）**
-- 把每一天渲染成一条横向/纵向的**站点链**：`[出发地] ──── 2.5h · 198km ──── [景点A] ──── 1h · 40km ──── [住宿地]`
-- 站点用**编号圆点**（1、2、3…），不同天用不同主色，线段上用箭头标示行进方向
-- 每段线上清晰标注 `车程时长 · 里程`（数据必须与 OSRM 验证结果一致）
-- 站点下方标注一句景点速览（一句话亮点），过近时用引线偏移
-- **可点击**：点击任一站点 → 高亮对应的地图标记，并滚动定位到对应景点卡片（视图联动，见 B）
-- 移动端自动改为纵向链条，方向一致向下
+---
 
-**2. SVG 行程示意图**
-- 基于 Phase 6 坐标映射；东右、西左、北上、南下
-- 景点节点下方标注 `城市·区县 · 一句话描述`
-- 路线线段中间标注实际车程距离
-- 按日期颜色编码；右上角绘制北向指示
-- 标签过近时用引线偏移到空白区域
-- 路线交叉时用 Bezier 曲线绕行
-- 线段末端加方向箭头；节点按站点编号
+## 参考文件
 
-**3. Leaflet 真实地图**
-- CartoDB Voyager 瓦片（`rastertiles/voyager`）
-- 按天颜色编码折线 + 发光效果（粗半透明底 + 细实线）
-- 自定义 `L.divIcon` 标记（彩色圆点 + 白色边框 + 脉冲环 + 站点编号）
-- 弹窗含景点名、所属市区、第几天、亮点描述、缩略图
-- **懒加载**：用户首次切换 tab 时初始化（隐藏 div 中初始化会导致瓦片异常）
-- `map.fitBounds()` 自适应所有标记点
+| 文件 | 内容 |
+|------|------|
+| `references/images.md` | 图源优先级、B站/ Pexels 采集、本地化、署名、Hero 规则 |
+| `references/maps.md` | 瓦片多源回退、看门狗、初始化健壮性、GCJ-02 偏移、坐标规则 |
+| `references/svg-map.md` | SVG 布局、引线偏移、白描边、**重叠检测脚本** |
+| `references/hiking.md` | 分段路书、海拔剖面、难度评级、轨迹获取、安全撤退 |
+| `references/shareable.md` | 单文件分享版原理、打包命令、体积预算、离线降级 |
+| `references/html-spec.md` | HTML 结构、交互、视觉反模板、打印、JS 铁律 |
+| `references/qa.md` | 交付前 QA Gate（含可直接粘贴的浏览器检测代码） |
 
-#### B. 互动性规范（让攻略「动起来」）
+## 脚本
 
-**日切换（Day Stepper）**
-- 顶部粘性导航内提供 `◀ Day N ▶` 切换 + 每日圆点快跳
-- 切换时：高亮对应「逐日行程」卡片、路线图只显示当日折线（或淡化其他天）、滚动到该日
-- 用 CSS 过渡 + Intersection Observer 实现平滑滚动
+| 脚本 | 用途 |
+|------|------|
+| `scripts/probe_sources.py` | 探测图源 / 瓦片源 / CDN / OSRM 可用性 |
+| `scripts/osrm_verify.py` | 批量验证每段车程（km + 时长 + 缓冲） |
+| `scripts/download_bili_covers.py` | 搜索并下载 B 站实拍封面 + 生成 credits |
+| `scripts/build_shareable.py` | 图片内嵌，生成单文件离线分享版 |
 
-**视图联动（Linked Views）**——核心互动特性
-- **任一视图点击站点**（串联图 / SVG / Leaflet 标记）→ 滚动并高亮对应的景点卡片
-- **悬停视图元素** → 其他视图同步高亮同一站点（如 hover 串联图站点，地图标记脉冲、SVG 节点放大）
-- 用统一的 `data-stop-id` 属性绑定三重视图与卡片，JS 事件委托实现
+## 示例
 
-**逐日行程卡片**
-- 可展开/收起；展开后显示完整时间轴、车程明细、住宿与美食
-- 时间轴条目 hover 显示对应车程距离/时长
-
-**景点卡片**
-- 可展开显示完整画廊 + 详情；悬停图片轻微放大
-
-**分类筛选**
-- 顶部景点筛选 chips：`全部 / 自然风光 / 人文历史 / 美食 / 夜景`，点击后过滤景点卡片网格并同步地图标记
-
-**互动预算**
-- 预算按类别（油费/门票/住宿/餐饮/其他）渲染为横向条形，点击类别可勾选/取消计入
-- 合计与人均预算实时重算；颜色表示「低于/接近/超出」预算
-
-**出行前清单**
-- 可勾选的 checklist（证件、装备、药品、天气、车辆检查等），本地 `localStorage` 记住勾选状态
-
-```javascript
-// 视图联动核心示意
-document.querySelectorAll('[data-stop-id]').forEach(el => {
-  el.addEventListener('mouseenter', () => highlightStop(el.dataset.stopId));
-  el.addEventListener('click', () => focusStop(el.dataset.stopId));
-});
-function highlightStop(id) {
-  document.querySelectorAll(`[data-stop-id="${id}"]`).forEach(n => n.classList.add('is-active'));
-}
-function focusStop(id) {
-  const card = document.querySelector(`.attraction-card[data-stop-id="${id}"]`);
-  card?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  highlightStop(id);
-}
-```
-
-#### C. 图片展示规范（景点图片更好看）
-
-**图片画廊（每景点一个）**
-- 每景点渲染 **1 张主图**（横版 16:9，≥800w）+ **2-4 张缩略图**（4:3），组成画廊
-- 点击主图/缩略图 → **Lightbox 全屏查看**：支持左右箭头切换、ESC 关闭、键盘方向键导航
-- 缩略图 hover 轻微放大（`transform: scale(1.06)` + 柔和阴影过渡）
-- 统一 `object-fit: cover`、`aspect-ratio`、圆角，避免图片变形
-- `loading="lazy"` + `decoding="async"` 提升加载体验
-
-**图注与信息**
-- 每张图配图注：`景点名 · 拍摄角度/最佳观赏时段 · 图片来源`
-- 主图上叠加「最佳观赏时段」徽章（日出 / 日落 / 夜景 / 季节限定）
-
-**图片来源与兜底**（按优先级）
-1. Unsplash：`https://images.unsplash.com/photo-{id}?w=800&q=80`（搜索 API `https://unsplash.com/napi/search/photos?query={英文关键词}&per_page=5&orientation=landscape` 无需 Key）
-2. Wikimedia Commons 高质量图片
-3. `https://picsum.photos/seed/{keyword}/800/450` 兜底
-
-**错误回退**：所有图片添加 `onerror` 逐级回退链：
-```html
-<img src="https://images.unsplash.com/photo-{id}?w=800&q=80" alt="景点名" loading="lazy"
-     onerror="this.onerror=null;this.src='https://picsum.photos/seed/{keyword}/800/450'">
-```
-- 图片尺寸建议主图 `800×450`，缩略图 `400×300`；Hero 用 `1600×900` 全幅
-- 避免人物肖像；优先体现景点标志性特征的横版风景
-- 社交平台图片（小红书/微博）无法外链，禁止使用
-
-**Lightbox 骨架示意**：
-```html
-<div id="lightbox" hidden>
-  <button data-lightbox="prev">‹</button>
-  <figure><img id="lightbox-img" alt=""><figcaption id="lightbox-cap"></figcaption></figure>
-  <button data-lightbox="next">›</button>
-</div>
-<script>
-  const gallery = document.querySelectorAll('.gallery img');
-  // 点击收集该景点全部画廊图片，按 index 浏览；ESC 关闭
-</script>
-```
-
-**移动端 & 打印**：移动端优先响应式；`@media print` 优化打印样式（隐藏交互控件，展示完整内容）；CSS 变量管理颜色系统。
-
-### Phase 9: 质量检查
-
-1. 浏览器打开 HTML 验证渲染效果
-2. 核对景点信息准确性、完整性
-3. 检查路线逻辑（无迂回、不走回头路）
-4. **对照坐标表验证 SVG 景点方位**：东→右、西→左、北→上、南→下
-5. **Grep 全文搜索里程数据**：串联图、SVG 标签、日程安排、每日汇总、总里程、油费预算 — 所有位置的里程数据必须匹配路由验证结果，无遗漏
-6. **验证时间线**：逐日检查 出发时间 + 车程 = 到达时间
-7. **验证互动功能**：点击每个日切换、每个站点（串联图/SVG/地图）均能正确联动到对应卡片；筛选 chips 生效；Lightbox 打开/关闭/切换正常
-8. **验证图片回退**：逐一检查图片 `onerror` 兜底可用；Lightbox 内图片加载正常
-9. **检查 Markdown 文档可读性、结构完整性**
-
-## 关键约束
-
-- **里程必须基于 OSRM 路由验证**，禁止估算（误差可达 50%+）
-- **坐标必须基于经纬度验证**，禁止凭感觉放置 SVG 节点
-- **同地级市的区县方位可能完全不同**，距离可能很远，出发地/目的地坐标不可遗漏
-- **短距离路段也要验证**（同城两景点可能比跨城还远）
-- **串联图的里程/时长必须与 OSRM 结果一致**，是「路线清晰」的基础
-- 旺季住宿价格需标注参考价
-- 社交平台图片（小红书/微博）无法外链，使用 Unsplash 替代
-- **里程数据散布在多处**（串联图、SVG、日程、汇总、预算、介绍文字），修改时必须全文搜索确认同步
-- 山区景点要标注驾驶注意事项
-- 景点名称要准确，预算要考虑旺季涨价
-- 每张景点图片都必须有图注与来源标注
+`examples/qingyuan-meiziping-yingxi/` —— 清远梅子坪古道 + 英西峰林两日徒步自驾，
+包含完整的 Markdown、交互 HTML、`route.svg`、图片清单与署名，可作为模板参考。

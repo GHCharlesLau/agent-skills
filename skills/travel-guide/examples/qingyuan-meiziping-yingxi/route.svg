@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 940" font-family="'PingFang SC','Microsoft YaHei',sans-serif">
+  <defs>
+    <marker id="arrow1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#E07B2A"/>
+    </marker>
+    <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3E7C66"/>
+    </marker>
+    <radialGradient id="nodeGrad" cx="50%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#fff"/>
+      <stop offset="100%" stop-color="#f3ead9"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="0" y="0" width="820" height="940" fill="#f7f2e8"/>
+
+  <!-- faint background contours -->
+  <g stroke="#e3d9c4" fill="none" stroke-width="1" opacity="0.7">
+    <path d="M40,200 C160,170 300,220 440,230"/>
+    <path d="M60,280 C180,250 300,300 460,330"/>
+    <path d="M20,450 C200,410 380,460 560,500"/>
+    <path d="M420,640 C540,660 640,680 780,700"/>
+  </g>
+
+  <!-- region label -->
+  <text x="410" y="46" text-anchor="middle" font-size="18" fill="#a89a7d" letter-spacing="2">清远 · 阳山 / 英德</text>
+
+  <!-- ====== routes ====== -->
+  <path data-route-day="1" d="M700,860 L150,90 L185,400" fill="none" stroke="#E07B2A" stroke-width="4" marker-end="url(#arrow1)"/>
+  <path data-route-day="2" d="M185,400 L170,300 L700,860" fill="none" stroke="#3E7C66" stroke-width="4" marker-end="url(#arrow2)"/>
+
+  <!-- segment labels -->
+  <g font-size="13" font-weight="600">
+    <text x="524" y="614" fill="#C2561E" stroke="#F7F2E8" stroke-width="4" paint-order="stroke" transform="rotate(-54 524 614)">4h · 280km</text>
+    <text x="168" y="252" fill="#C2561E" stroke="#F7F2E8" stroke-width="4" paint-order="stroke">1h · 61km</text>
+    <text x="177" y="350" fill="#2E6451" stroke="#F7F2E8" stroke-width="4" paint-order="stroke">30min · 9km</text>
+    <text x="435" y="580" fill="#2E6451" stroke="#F7F2E8" stroke-width="4" paint-order="stroke" transform="rotate(-54 435 580)">4h · 262km</text>
+  </g>
+
+  <!-- ====== nodes ====== -->
+  <!-- 梅子坪 -->
+  <circle cx="150" cy="90" r="15" fill="url(#nodeGrad)" stroke="#23251E" stroke-width="2.5"/>
+  <circle cx="150" cy="90" r="5" fill="#E07B2A"/>
+  <text x="150" y="62" text-anchor="middle" font-size="14" font-weight="700" fill="#23251E">① 梅子坪古道</text>
+  <text x="150" y="124" text-anchor="middle" font-size="10.5" fill="#6b6455">阳山·江英镇 · 黑石林 / 千年古道</text>
+
+  <!-- 黄花镇 -->
+  <circle cx="170" cy="300" r="13" fill="url(#nodeGrad)" stroke="#23251E" stroke-width="2.5"/>
+  <circle cx="170" cy="300" r="5" fill="#3E7C66"/>
+  <line x1="183" y1="300" x2="195" y2="300" stroke="#c4bba6" stroke-width="1.5"/>
+  <text x="198" y="296" font-size="14" font-weight="700" fill="#23251E">② 黄花镇 · 小赵州桥</text>
+  <text x="198" y="311" font-size="10.5" fill="#6b6455">英西峰林精华徒步起点</text>
+
+  <!-- 九龙镇 -->
+  <circle cx="185" cy="400" r="13" fill="url(#nodeGrad)" stroke="#23251E" stroke-width="2.5"/>
+  <circle cx="185" cy="400" r="5" fill="#3E7C66"/>
+  <line x1="198" y1="400" x2="210" y2="400" stroke="#c4bba6" stroke-width="1.5"/>
+  <text x="213" y="396" font-size="14" font-weight="700" fill="#23251E">③ 九龙镇 · 住宿</text>
+  <text x="213" y="411" font-size="10.5" fill="#6b6455">英德市 · 英西峰林门户 / 九龙豆腐</text>
+
+  <!-- 深圳 -->
+  <circle cx="700" cy="860" r="15" fill="url(#nodeGrad)" stroke="#23251E" stroke-width="2.5"/>
+  <circle cx="700" cy="860" r="5" fill="#23251E"/>
+  <text x="700" y="896" text-anchor="middle" font-size="14" font-weight="700" fill="#23251E">深圳 · 出发 / 返程</text>
+
+  <!-- north arrow -->
+  <g transform="translate(760,60)">
+    <path d="M0,22 L0,0 M0,0 L-7,10 L0,4 L7,10 Z" fill="#23251E" stroke="#23251E" stroke-width="1.5"/>
+    <text x="0" y="40" text-anchor="middle" font-size="12" fill="#6b6455">北</text>
+  </g>
+
+  <!-- legend -->
+  <g transform="translate(560,130)">
+    <rect x="0" y="0" width="190" height="74" rx="8" fill="#fff" stroke="#e7dcc6"/>
+    <text x="12" y="22" font-size="12" font-weight="700" fill="#23251E">路线图例</text>
+    <line x1="14" y1="38" x2="52" y2="38" stroke="#E07B2A" stroke-width="4" marker-end="url(#arrow1)"/>
+    <text x="60" y="42" font-size="11" fill="#6b6455">Day 1</text>
+    <line x1="14" y1="60" x2="52" y2="60" stroke="#3E7C66" stroke-width="4" marker-end="url(#arrow2)"/>
+    <text x="60" y="64" font-size="11" fill="#6b6455">Day 2</text>
+  </g>
+</svg>

@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>清远·梅子坪古道 × 英西峰林 徒步自驾游攻略</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{
+  --paper:#F6F0E1; --card:#FFFBF1; --ink:#23251E; --ink-soft:#55503F;
+  --muted:#8C7E63; --line:#E4D9C3; --day1:#E07B2A; --day1-deep:#B4551A;
+  --day2:#3E7C66; --day2-deep:#2E5D4B; --clay:#A5673F; --cream:#FFF6E5;
+  --shadow:0 6px 22px rgba(60,52,32,.14);
+  --font-d:'Ma Shan Zheng','Noto Sans SC',cursive;
+  --font-b:'Noto Sans SC',system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-b);background:var(--paper);color:var(--ink);line-height:1.7}
+img{display:block;max-width:100%}
+h1,h2,h3,.font-d{font-family:var(--font-d)}
+::selection{background:rgba(224,123,42,.25)}
+
+/* ===== Hero ===== */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;color:#fff;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:url('https://images.pexels.com/photos/36204285/pexels-photo-36204285.jpeg?auto=compress&cs=tinysrgb&w=1600') center/cover no-repeat;filter:saturate(1.05)}
+.hero-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(24,27,20,.55) 0%,rgba(24,27,20,.25) 40%,rgba(28,26,18,.88) 100%)}
+.hero .content{position:relative;z-index:2;padding:0 6vw;max-width:1000px}
+.hero .eyebrow{letter-spacing:.4em;font-size:.85rem;font-weight:500;opacity:.85;margin-bottom:1.2rem}
+.hero h1{font-size:clamp(2.6rem,7vw,5.2rem);font-weight:400;line-height:1.15;text-shadow:0 4px 30px rgba(0,0,0,.45);margin-bottom:.6rem}
+.hero .sub{font-size:clamp(1rem,2.2vw,1.3rem);opacity:.95;margin-bottom:2.2rem}
+.hero .stats{display:flex;flex-wrap:wrap;gap:.7rem;justify-content:center}
+.stat{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(6px);border-radius:999px;padding:.55rem 1.3rem;font-size:.9rem}
+.stat b{font-weight:900;font-size:1.15rem;color:#FFD9A8}
+.scrolldown{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:2;color:#fff;opacity:.9;font-size:.8rem;letter-spacing:.2em;animation:bob 2s infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ===== Sticky nav ===== */
+nav{position:sticky;top:0;z-index:900;background:rgba(35,37,30,.96);backdrop-filter:blur(8px);color:#fff;box-shadow:0 2px 14px rgba(0,0,0,.3)}
+.nav-inner{max-width:1100px;margin:0 auto;padding:.7rem 1.2rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.nav-inner .brand{font-family:var(--font-d);font-size:1.25rem;margin-right:.8rem;color:#FFD9A8}
+.nav-links{display:flex;gap:.2rem;flex-wrap:wrap}
+.nav-links a{color:#e9e4d4;text-decoration:none;font-size:.82rem;padding:.35rem .7rem;border-radius:6px;transition:.2s}
+.nav-links a:hover{background:rgba(255,255,255,.12)}
+.day-stepper{display:flex;align-items:center;gap:.45rem;margin-left:auto}
+.day-stepper button{background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:8px;padding:.3rem .75rem;cursor:pointer;font-size:.85rem;transition:.2s}
+.day-stepper button:hover{background:rgba(255,255,255,.15)}
+.day-stepper .dlabel{font-size:.8rem;font-weight:700}
+.day-dots{display:flex;gap:.35rem}
+.day-dots span{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.4);cursor:pointer;transition:.2s}
+.day-dots span.on{background:#FFD9A8;transform:scale(1.25)}
+
+/* ===== Sections ===== */
+section{padding:3.4rem 1.2rem}
+.wrap{max-width:1100px;margin:0 auto}
+.sec-head{margin-bottom:1.8rem}
+.sec-head .kick{font-size:.78rem;letter-spacing:.35em;color:var(--clay);font-weight:700}
+.sec-head h2{font-size:clamp(1.9rem,4.5vw,3rem);color:var(--ink);font-weight:400;margin:.2rem 0 .3rem}
+.sec-head p{color:var(--muted);font-size:.95rem;max-width:720px}
+
+/* ===== View switcher ===== */
+.view-tabs{display:flex;gap:.5rem;margin-bottom:1.4rem;flex-wrap:wrap}
+.view-tabs button{background:var(--card);border:1.5px solid var(--line);color:var(--ink-soft);border-radius:999px;padding:.5rem 1.2rem;cursor:pointer;font-size:.9rem;transition:.2s;font-weight:500}
+.view-tabs button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.view-panel{display:none}
+.view-panel.on{display:block;animation:fade .35s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+
+/* ===== Route chain ===== */
+.chain{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:1.2rem 1rem;margin-bottom:1rem;box-shadow:var(--shadow);transition:.3s}
+.chain.is-muted{opacity:.35}
+.chain .c-title{font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.chain .c-title .tag{font-size:.72rem;border-radius:6px;padding:.15rem .55rem;color:#fff;font-weight:500}
+.chain .c-title .tag.d1{background:var(--day1)}
+.chain .c-title .tag.d2{background:var(--day2)}
+.chain-row{display:flex;flex-wrap:wrap;align-items:center;gap:.55rem;justify-content:center}
+.stop{display:inline-flex;flex-direction:column;align-items:center;gap:.25rem;cursor:pointer;background:transparent;border:none;padding:.3rem;border-radius:12px;transition:.2s;min-width:118px}
+.stop .num{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:900;font-size:1rem;box-shadow:0 3px 10px rgba(0,0,0,.25);transition:.2s}
+.stop.d1 .num{background:var(--day1)}
+.stop.d2 .num{background:var(--day2)}
+.stop.sz .num{background:var(--ink)}
+.stop .nm{font-size:.88rem;font-weight:700;line-height:1.25;text-align:center}
+.stop .sm{font-size:.68rem;color:var(--muted);text-align:center}
+.stop:hover .num{transform:scale(1.12)}
+.stop.is-active .num{outline:3px solid #FFD9A8;outline-offset:2px}
+.stop.is-active .nm{color:var(--day1-deep)}
+.link{display:inline-flex;align-items:center;color:var(--ink-soft);font-size:.74rem;font-weight:700;white-space:nowrap}
+.link .ln{display:inline-block;min-width:64px;height:2px;background:repeating-linear-gradient(90deg,currentColor 0 6px,transparent 6px 10px);margin:0 .4rem;position:relative}
+.link .ln::after{content:'▶';position:absolute;right:-4px;top:-7px;font-size:.7rem;color:currentColor}
+
+/* ===== SVG panel ===== */
+.svg-panel{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:1rem;display:flex;justify-content:center}
+.svg-panel svg{max-width:100%;height:auto}
+.svg-panel [data-stop-id]{cursor:pointer}
+.svg-panel [data-stop-id]:hover .node-core{stroke:#FFD9A8;stroke-width:3}
+.svg-panel [data-stop-id].is-active .node-core{stroke:#FFD9A8;stroke-width:4}
+.svg-panel [data-route-day]{transition:.3s}
+.svg-panel [data-route-day].is-dimmed{opacity:.15}
+
+/* ===== Leaflet ===== */
+#map{height:540px;border-radius:18px;border:1px solid var(--line);box-shadow:var(--shadow);background:#e8e0cf}
+.basemap-switch{display:flex;align-items:center;gap:.5rem;justify-content:center;margin-top:.8rem;font-size:.8rem;color:var(--muted)}
+.basemap-switch button{background:var(--card);border:1.5px solid var(--line);color:var(--ink-soft);border-radius:999px;padding:.3rem .9rem;cursor:pointer;font-size:.78rem;transition:.2s;font-weight:500}
+.basemap-switch button.on{background:var(--day2);border-color:var(--day2);color:#fff}
+.map-offline{color:#C2561E!important;font-weight:600;margin-top:.6rem}
+.map-offline[hidden]{display:none}
+.leaflet-div-icon{background:transparent;border:none}
+.mk{position:relative;width:30px;height:30px}
+.mk .dot{width:24px;height:24px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);display:grid;place-items:center;color:#fff;font-size:.68rem;font-weight:900}
+.mk .ring{position:absolute;inset:0;border-radius:50%;border:2px solid currentColor;animation:pulse 2s infinite}
+.mk.is-active .dot{outline:3px solid #FFD9A8;outline-offset:1px}
+@keyframes pulse{0%{transform:scale(.6);opacity:.9}70%{transform:scale(1.5);opacity:0}100%{opacity:0}}
+.mapnote{font-size:.75rem;color:var(--muted);margin-top:.6rem;text-align:center}
+
+/* ===== Day cards ===== */
+.day-card{background:var(--card);border:1px solid var(--line);border-radius:18px;margin-bottom:1.4rem;box-shadow:var(--shadow);overflow:hidden;transition:.3s}
+.day-card.is-current{border-color:var(--day1);box-shadow:0 0 0 2px rgba(224,123,42,.25),var(--shadow)}
+.day-card[data-day="2"].is-current{border-color:var(--day2);box-shadow:0 0 0 2px rgba(62,124,102,.25),var(--shadow)}
+.dc-head{padding:1rem 1.2rem;display:flex;align-items:center;gap:.9rem;flex-wrap:wrap;cursor:pointer;user-select:none}
+.dc-head .dnum{font-family:var(--font-d);font-size:2.2rem;line-height:1;color:var(--day1-deep)}
+.day-card[data-day="2"] .dc-head .dnum{color:var(--day2-deep)}
+.dc-head .dt h3{font-size:1.25rem;font-family:var(--font-b);font-weight:900}
+.dc-head .dt .dd{font-size:.82rem;color:var(--muted)}
+.dc-head .chev{margin-left:auto;transition:.3s;color:var(--muted)}
+.day-card.open .chev{transform:rotate(180deg)}
+.dc-body{display:none;padding:0 1.2rem 1.2rem}
+.day-card.open .dc-body{display:block;animation:fade .3s}
+table.tl{width:100%;border-collapse:collapse;font-size:.88rem}
+.tl td,.tl th{border-bottom:1px dashed var(--line);padding:.55rem .5rem;vertical-align:top;text-align:left}
+.tl th{font-weight:700;color:var(--clay);width:92px;white-space:nowrap}
+.tl tr:hover td{background:rgba(224,123,42,.06)}
+.dc-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.9rem;margin-top:1rem}
+.meta-box{border:1px dashed var(--line);border-radius:12px;padding:.7rem .9rem;font-size:.82rem}
+.meta-box b{color:var(--clay)}
+
+/* ===== Attraction cards ===== */
+.filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.4rem}
+.filters button{background:var(--card);border:1.5px solid var(--line);color:var(--ink-soft);border-radius:999px;padding:.42rem 1rem;cursor:pointer;font-size:.82rem;transition:.2s;font-weight:500}
+.filters button.on{background:var(--day1);border-color:var(--day1);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:1.3rem}
+.attraction-card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow);transition:.25s;scroll-margin-top:90px}
+.attraction-card:hover{transform:translateY(-4px)}
+.attraction-card.is-hidden{display:none}
+.attraction-card.is-active{box-shadow:0 0 0 3px rgba(224,123,42,.35),var(--shadow)}
+.ac-main{position:relative}
+.ac-main .badge{position:absolute;top:.7rem;left:.7rem;background:rgba(232,104,20,.9);color:#fff;font-size:.7rem;font-weight:700;padding:.25rem .7rem;border-radius:999px;letter-spacing:.04em;z-index:2}
+.ac-main img{aspect-ratio:16/9;object-fit:cover;width:100%;cursor:zoom-in;transition:.4s}
+.ac-main img:hover{transform:scale(1.03)}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:3px;background:var(--card)}
+.thumbs img{aspect-ratio:4/3;object-fit:cover;width:100%;cursor:zoom-in;transition:.3s}
+.thumbs img:hover{transform:scale(1.06);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.img-credit{font-size:.68rem;color:var(--muted);margin-top:.55rem;border-top:1px dashed var(--line);padding-top:.45rem;line-height:1.5}
+.ac-body{padding:.95rem 1rem}
+.ac-body h3{font-family:var(--font-b);font-size:1.1rem;font-weight:900;display:flex;align-items:center;gap:.5rem}
+.ac-body h3 .tick{font-size:.68rem;color:#fff;background:var(--day2);border-radius:6px;padding:.1rem .5rem;font-weight:500}
+.ac-tags{display:flex;gap:.4rem;flex-wrap:wrap;margin:.5rem 0}
+.ac-tags span{font-size:.68rem;background:var(--cream);border:1px solid var(--line);color:var(--clay);border-radius:6px;padding:.12rem .55rem}
+.ac-body p{font-size:.86rem;color:var(--ink-soft);margin-bottom:.6rem}
+.ac-info{font-size:.8rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:.6rem;margin-top:.4rem;display:grid;grid-template-columns:1fr 1fr;gap:.3rem .8rem}
+.ac-info b{color:var(--ink-soft);font-weight:700}
+.ac-links{display:flex;gap:.5rem;margin-top:.7rem;flex-wrap:wrap}
+.ac-links a{font-size:.76rem;text-decoration:none;background:var(--ink);color:#fff;border-radius:8px;padding:.32rem .8rem;transition:.2s}
+.ac-links a:hover{background:var(--day1-deep)}
+
+/* ===== Trail (hiking routes) ===== */
+.trail-card{background:var(--card);border:1px solid var(--line);border-radius:18px;margin-bottom:1.4rem;box-shadow:var(--shadow);overflow:hidden}
+.trail-head{padding:1rem 1.2rem;border-bottom:1px dashed var(--line);display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
+.trail-head .tn{font-family:var(--font-d);font-size:1.9rem;line-height:1;color:var(--day1-deep)}
+.trail-card.t2 .trail-head .tn{color:var(--day2-deep)}
+.trail-head .tt h3{font-family:var(--font-b);font-weight:900;font-size:1.15rem}
+.trail-head .tt .ts{font-size:.8rem;color:var(--muted)}
+.trail-stats{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.6rem}
+.trail-stats span{background:var(--cream);border:1px solid var(--line);color:var(--clay);border-radius:8px;padding:.2rem .7rem;font-size:.74rem;font-weight:700}
+.trail-body{padding:1rem 1.2rem 1.2rem;display:grid;grid-template-columns:1.5fr 1fr;gap:1.3rem}
+@media(max-width:820px){.trail-body{grid-template-columns:1fr}}
+.trail-steps ol{list-style:none;counter-reset:step}
+.trail-steps li{counter-increment:step;padding:.45rem .4rem .45rem 2.4rem;position:relative;border-left:2px solid var(--line);margin-left:.7rem;font-size:.85rem;color:var(--ink-soft)}
+.trail-steps li:last-child{border-left-color:transparent}
+.trail-steps li::before{content:counter(step);position:absolute;left:-.95rem;top:.45rem;width:1.55rem;height:1.55rem;border-radius:50%;background:var(--day1);color:#fff;font-weight:700;font-size:.75rem;display:grid;place-items:center}
+.trail-card.t2 .trail-steps li::before{background:var(--day2)}
+.trail-steps li b{color:var(--ink)}
+.trail-steps li .km{display:block;font-size:.72rem;color:var(--muted)}
+.trail-profile h4{font-family:var(--font-b);font-size:.9rem;font-weight:900;color:var(--clay);margin-bottom:.4rem}
+.trail-profile svg{width:100%;height:auto;background:var(--cream);border-radius:12px;border:1px solid var(--line)}
+.trail-note{font-size:.76rem;color:var(--muted);margin-top:.5rem;line-height:1.6}
+
+/* ===== Accommodation / Food ===== */
+.simple-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.2rem}
+.simple-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:1.1rem 1.2rem;box-shadow:var(--shadow)}
+.simple-card h3{font-family:var(--font-b);font-size:1.05rem;font-weight:900;color:var(--clay);margin-bottom:.5rem}
+.simple-card ul{list-style:none}
+.simple-card li{padding:.28rem 0 .28rem 1.3rem;position:relative;font-size:.86rem;color:var(--ink-soft)}
+.simple-card li::before{content:'●';position:absolute;left:0;color:var(--day1);font-size:.7rem;top:.5rem}
+.simple-card .note{font-size:.74rem;color:var(--muted);margin-top:.6rem}
+
+/* ===== Budget ===== */
+.budget-box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:1.3rem;box-shadow:var(--shadow)}
+.b-total{display:flex;gap:2rem;flex-wrap:wrap;align-items:baseline;margin-bottom:1.2rem}
+.b-total .amt{font-family:var(--font-d);font-size:2.6rem;color:var(--ink)}
+.b-total .per{font-size:1rem;color:var(--clay)}
+.b-total .per b{font-size:1.4rem}
+.b-row{display:flex;align-items:center;gap:.9rem;padding:.5rem 0;cursor:pointer;flex-wrap:wrap}
+.b-row input{width:18px;height:18px;accent-color:var(--day1)}
+.b-row .bname{width:120px;font-weight:700;font-size:.88rem}
+.b-row .bar-wrap{flex:1;min-width:160px;background:#efe7d6;border-radius:8px;height:22px;overflow:hidden}
+.b-row .bar{height:100%;border-radius:8px;transition:.3s}
+.b-row .bval{width:96px;text-align:right;font-size:.85rem;font-weight:700}
+.b-hint{font-size:.75rem;color:var(--muted);margin-top:.6rem}
+
+/* ===== Tips / checklist ===== */
+.tips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.1rem}
+.tip{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:1rem 1.1rem;box-shadow:var(--shadow)}
+.tip .ti{font-size:1.3rem}
+.tip h3{font-family:var(--font-b);font-size:1rem;font-weight:900;margin:.35rem 0 .3rem}
+.tip p{font-size:.83rem;color:var(--ink-soft)}
+.checklist{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:1.3rem;margin-top:1.4rem;box-shadow:var(--shadow)}
+.checklist h3{font-family:var(--font-b);font-weight:900;margin-bottom:.8rem;display:flex;justify-content:space-between;align-items:center}
+.checklist h3 .pct{font-size:.8rem;color:var(--clay)}
+.cl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.5rem}
+.cl-grid label{display:flex;align-items:center;gap:.55rem;font-size:.85rem;color:var(--ink-soft);cursor:pointer;padding:.4rem .6rem;border-radius:8px;transition:.2s;background:var(--cream);border:1px solid transparent}
+.cl-grid label:hover{background:#f3e6c8}
+.cl-grid label.done{opacity:.6;text-decoration:line-through}
+.cl-grid input{accent-color:var(--day2)}
+
+/* ===== Refs / Footer ===== */
+.refs{font-size:.82rem;color:var(--ink-soft)}
+.refs ol{padding-left:1.2rem;display:grid;gap:.35rem}
+.refs a{color:var(--clay)}
+footer{background:var(--ink);color:#c9c4b2;text-align:center;padding:2.6rem 1.2rem}
+footer .ff{font-family:var(--font-d);font-size:1.4rem;color:#FFD9A8;margin-bottom:.6rem}
+footer p{font-size:.78rem;opacity:.85;max-width:720px;margin:0 auto}
+
+/* ===== Lightbox ===== */
+#lightbox{position:fixed;inset:0;z-index:1200;background:rgba(15,15,12,.94);display:none;align-items:center;justify-content:center;flex-direction:column;gap:1rem;padding:1rem}
+#lightbox.open{display:flex}
+#lightbox img{max-width:92vw;max-height:76vh;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+#lightbox .cap{color:#e9e4d4;font-size:.88rem;text-align:center;max-width:80vw}
+#lightbox .nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:#fff;font-size:2rem;width:52px;height:52px;border-radius:50%;cursor:pointer;transition:.2s}
+#lightbox .nav:hover{background:rgba(255,255,255,.3)}
+#lightbox .nav.prev{left:1rem}
+#lightbox .nav.next{right:1rem}
+#lightbox .close{position:absolute;top:1rem;right:1.4rem;background:none;border:none;color:#fff;font-size:2rem;cursor:pointer}
+
+/* ===== Responsive / Print ===== */
+@media (max-width:760px){
+  .day-stepper{margin-left:0;width:100%;justify-content:flex-start}
+  .nav-links{order:3;width:100%}
+  .tl td{padding:.45rem .3rem}
+  .ac-info{grid-template-columns:1fr}
+  .hero .stats{gap:.5rem}
+}
+@media print{
+  nav,.filters,.view-tabs,.ac-links,.day-stepper,#lightbox{display:none!important}
+  .view-panel{display:block!important}
+  section{break-inside:avoid;padding:1rem 0}
+  body{background:#fff}
+  .day-card,.attraction-card,.budget-box,.simple-card,.tip,.checklist{box-shadow:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="hero-bg"></div>
+  <div class="content">
+    <div class="eyebrow">深 圳 出 发 · 自 驾 两 日 · 徒 步 之 旅</div>
+    <h1>墨石古道 · 峰林画廊</h1>
+    <div class="sub">清远 · 梅子坪古道（广东版墨石公园）✕ 英西峰林（英西小桂林）</div>
+    <div class="stats">
+      <span class="stat"><b>2</b> 天 徒步</span>
+      <span class="stat"><b>4+</b> 打卡点</span>
+      <span class="stat"><b>~612km</b> 总里程</span>
+      <span class="stat"><b>人均≈340</b> 元</span>
+      <span class="stat"><b>11.14–11.15</b> 出发</span>
+    </div>
+  </div>
+  <div class="scrolldown">▼ 往下看路线</div>
+</header>
+
+<!-- ============ NAV ============ -->
+<nav>
+  <div class="nav-inner">
+    <span class="brand">山野两日</span>
+    <div class="nav-links">
+      <a href="#route">路线总览</a>
+      <a href="#days">逐日行程</a>
+      <a href="#trail">徒步路线</a>
+      <a href="#spots">景点详情</a>
+      <a href="#stay">住宿</a>
+      <a href="#food">美食</a>
+      <a href="#budget">预算</a>
+      <a href="#tips">贴士</a>
+    </div>
+    <div class="day-stepper">
+      <button id="dayPrev" title="前一天">◀</button>
+      <span class="dlabel" id="dayLabel">Day 1</span>
+      <button id="dayNext" title="后一天">▶</button>
+      <div class="day-dots">
+        <span data-day-dot="1" class="on"></span>
+        <span data-day-dot="2"></span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ ROUTE OVERVIEW ============ -->
+<section id="route">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kick">ROUTE</div>
+      <h2>路线总览</h2>
+      <p>三重视图看行程：串联图看「怎么走」，示意图看「方位」，真实地图看「路况」。点击任一站点可联动定位到景点卡片。</p>
+    </div>
+    <div class="view-tabs">
+      <button class="on" data-view="chain">串联图</button>
+      <button data-view="svg">行程示意图</button>
+      <button data-view="map">真实地图</button>
+    </div>
+
+    <!-- View 1: chain -->
+    <div class="view-panel on" id="panel-chain">
+      <div class="chain" data-day="1">
+        <div class="c-title"><span class="tag d1">Day 1 · 11.14</span> 深圳 → 梅子坪古道 → 九龙镇</div>
+        <div class="chain-row">
+          <button class="stop sz" data-stop-id="shenzhen"><span class="num">S</span><span class="nm">深圳</span><span class="sm">出发 06:30</span></button>
+          <span class="link" style="color:var(--day1)"><span class="ln"></span>4h · 280km</span>
+          <button class="stop d1" data-stop-id="meiziping"><span class="num">1</span><span class="nm">梅子坪古道</span><span class="sm">黑石林 · 千年古道</span></button>
+          <span class="link" style="color:var(--day1)"><span class="ln"></span>1h · 61km</span>
+          <button class="stop d1" data-stop-id="jiulong"><span class="num">2</span><span class="nm">九龙镇</span><span class="sm">住宿 · 九龙豆腐</span></button>
+        </div>
+      </div>
+      <div class="chain" data-day="2">
+        <div class="c-title"><span class="tag d2">Day 2 · 11.15</span> 九龙镇 → 黄花镇(英西峰林) → 深圳</div>
+        <div class="chain-row">
+          <button class="stop d2" data-stop-id="jiulong"><span class="num">2</span><span class="nm">九龙镇</span><span class="sm">出发 08:30</span></button>
+          <span class="link" style="color:var(--day2)"><span class="ln"></span>30min · 9km</span>
+          <button class="stop d2" data-stop-id="huanghua"><span class="num">3</span><span class="nm">黄花镇·小赵州桥</span><span class="sm">峰林徒步起点</span></button>
+          <span class="link" style="color:var(--day2)"><span class="ln"></span>徒步 10km</span>
+          <button class="stop d2" data-stop-id="guanyingu"><span class="num">4</span><span class="nm">和顺岩 · 观音谷</span><span class="sm">穿山洞 · 峰林谷地</span></button>
+          <span class="link" style="color:var(--day2)"><span class="ln"></span>返程 4h · 262km</span>
+          <button class="stop sz" data-stop-id="shenzhen"><span class="num">S</span><span class="nm">深圳</span><span class="sm">19:00 到家</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- View 2: SVG -->
+    <div class="view-panel" id="panel-svg">
+      <div class="svg-panel">
+        <svg viewBox="0 0 820 940" font-family="'PingFang SC','Microsoft YaHei',sans-serif" style="max-width:560px;width:100%">
+          <defs>
+            <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#E07B2A"/></marker>
+            <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3E7C66"/></marker>
+            <radialGradient id="ng" cx="50%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#f3ead9"/></radialGradient>
+          </defs>
+          <rect width="820" height="940" fill="#fbf6ea"/>
+          <g stroke="#e7dcc6" fill="none" stroke-width="1" opacity=".7">
+            <path d="M40,200 C160,170 300,220 440,230"/>
+            <path d="M60,280 C180,250 300,300 460,330"/>
+            <path d="M20,450 C200,410 380,460 560,500"/>
+            <path d="M420,640 C540,660 640,680 780,700"/>
+          </g>
+          <text x="410" y="46" text-anchor="middle" font-size="18" fill="#a89a7d" letter-spacing="2" font-family="inherit">清远 · 阳山 / 英德</text>
+
+          <!-- routes -->
+          <path data-route-day="1" d="M700,860 L150,90 L185,400" fill="none" stroke="#E07B2A" stroke-width="4" marker-end="url(#a1)"/>
+          <path data-route-day="2" d="M185,400 L170,300 L700,860" fill="none" stroke="#3E7C66" stroke-width="4" marker-end="url(#a2)"/>
+
+          <g font-size="13" font-weight="600" font-family="inherit">
+            <text x="524" y="614" fill="#C2561E" stroke="#FBF6EA" stroke-width="4" paint-order="stroke" transform="rotate(-54 524 614)">4h · 280km</text>
+            <text x="168" y="252" fill="#C2561E" stroke="#FBF6EA" stroke-width="4" paint-order="stroke">1h · 61km</text>
+            <text x="177" y="350" fill="#2E6451" stroke="#FBF6EA" stroke-width="4" paint-order="stroke">30min · 9km</text>
+            <text x="435" y="580" fill="#2E6451" stroke="#FBF6EA" stroke-width="4" paint-order="stroke" transform="rotate(-54 435 580)">4h · 262km</text>
+          </g>
+
+          <!-- nodes -->
+          <g data-stop-id="meiziping" class="node">
+            <circle cx="150" cy="90" r="15" fill="url(#ng)" stroke="#23251E" stroke-width="2.5" class="node-core"/>
+            <circle cx="150" cy="90" r="5" fill="#E07B2A"/>
+            <text x="150" y="62" text-anchor="middle" font-size="14" font-weight="700" fill="#23251E">① 梅子坪古道</text>
+            <text x="150" y="124" text-anchor="middle" font-size="10.5" fill="#6b6455">阳山·江英镇 · 黑石林 / 千年古道</text>
+          </g>
+          <g data-stop-id="huanghua" class="node">
+            <circle cx="170" cy="300" r="13" fill="url(#ng)" stroke="#23251E" stroke-width="2.5" class="node-core"/>
+            <circle cx="170" cy="300" r="5" fill="#3E7C66"/>
+            <line x1="183" y1="300" x2="195" y2="300" stroke="#c4bba6" stroke-width="1.5"/>
+            <text x="198" y="296" font-size="14" font-weight="700" fill="#23251E">② 黄花镇 · 小赵州桥</text>
+            <text x="198" y="311" font-size="10.5" fill="#6b6455">英西峰林精华徒步起点</text>
+          </g>
+          <g data-stop-id="jiulong" class="node">
+            <circle cx="185" cy="400" r="13" fill="url(#ng)" stroke="#23251E" stroke-width="2.5" class="node-core"/>
+            <circle cx="185" cy="400" r="5" fill="#3E7C66"/>
+            <line x1="198" y1="400" x2="210" y2="400" stroke="#c4bba6" stroke-width="1.5"/>
+            <text x="213" y="396" font-size="14" font-weight="700" fill="#23251E">③ 九龙镇 · 住宿</text>
+            <text x="213" y="411" font-size="10.5" fill="#6b6455">英德市 · 英西峰林门户 / 九龙豆腐</text>
+          </g>
+          <g data-stop-id="shenzhen" class="node">
+            <circle cx="700" cy="860" r="15" fill="url(#ng)" stroke="#23251E" stroke-width="2.5" class="node-core"/>
+            <circle cx="700" cy="860" r="5" fill="#23251E"/>
+            <text x="700" y="896" text-anchor="middle" font-size="14" font-weight="700" fill="#23251E">深圳 · 出发 / 返程</text>
+          </g>
+
+          <g transform="translate(760,60)">
+            <path d="M0,22 L0,0 M0,0 L-7,10 L0,4 L7,10 Z" fill="#23251E" stroke="#23251E" stroke-width="1.5"/>
+            <text x="0" y="40" text-anchor="middle" font-size="12" fill="#6b6455">北</text>
+          </g>
+          <g transform="translate(560,130)">
+            <rect width="190" height="74" rx="8" fill="#fff" stroke="#e7dcc6"/>
+            <text x="12" y="22" font-size="12" font-weight="700" fill="#23251E">路线图例</text>
+            <line x1="14" y1="38" x2="52" y2="38" stroke="#E07B2A" stroke-width="4" marker-end="url(#a1)"/><text x="60" y="42" font-size="11" fill="#6b6455">Day 1</text>
+            <line x1="14" y1="60" x2="52" y2="60" stroke="#3E7C66" stroke-width="4" marker-end="url(#a2)"/><text x="60" y="64" font-size="11" fill="#6b6455">Day 2</text>
+          </g>
+        </svg>
+      </div>
+      <p class="mapnote">示意图基于真实经纬度按比例映射 · 东右西左 · 北上南下 · 里程均为 OSRM 实测</p>
+    </div>
+
+    <!-- View 3: Leaflet -->
+    <div class="view-panel" id="panel-map">
+      <div id="map"></div>
+      <div class="basemap-switch">
+        <span>底图：</span>
+        <button class="on" data-basemap="amap">高德路网</button>
+        <button data-basemap="esri">卫星影像</button>
+        <button data-basemap="topo">地形图</button>
+        <button data-basemap="carto">经典地形</button>
+      </div>
+      <p class="mapnote">点击标记可联动查看景点卡片 · 线路颜色：橙=Day1 / 绿=Day2 · 红虚线=徒步轨迹（示意） · 若底图加载失败会自动切换</p>
+      <p class="mapnote map-offline" id="mapOffline" hidden>当前网络无法加载地图瓦片（本页其余内容与全部图片仍可离线查看）→ 请切换到「行程示意图」查看路线。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DAYS ============ -->
+<section id="days" style="background:#f0e7d5">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kick">ITINERARY</div>
+      <h2>逐日行程</h2>
+      <p>点击卡片标题可展开时间轴；顶栏「Day 切换」可快速定位对应一天。</p>
+    </div>
+
+    <div class="day-card open is-current" data-day="1">
+      <div class="dc-head">
+        <span class="dnum">Day 1</span>
+        <div class="dt">
+          <h3>11月14日 · 周六 · 梅子坪古道 · 黑石秘境</h3>
+          <span class="dd">阳山·江英镇 — 广东版「墨石公园」千年古道 · 全程免费</span>
+        </div>
+        <span class="chev">▾</span>
+      </div>
+      <div class="dc-body">
+        <table class="tl">
+          <tr><th>06:30</th><td>深圳出发，加满油，早餐干粮车上解决</td></tr>
+          <tr><th>10:45</th><td>抵达梅子坪古道起点（导航「阳山县江英镇上坪村党群服务中心」，免费停车；登山口更近可导「周屋农庄」）</td></tr>
+          <tr><th>11:00</th><td>开始徒步 8km 精华小环线 · 爬升约300m · 约3.5–4.5h</td></tr>
+          <tr><th>12:00</th><td>古道午餐：黑石林旁野餐（自带）或梅子坪村/邓公村小卖部豆腐花绿豆沙（<b>带现金</b>）</td></tr>
+          <tr><th>13:00</th><td>精华段打卡：黑石林核心区 / 青石板马蹄印古道 / 梯田古村 / 牛羊群 / 秋日黄叶</td></tr>
+          <tr><th>15:00</th><td>收整下山（山区天黑快，务必 15:30 前返回车旁）</td></tr>
+          <tr><th>15:30</th><td>车程转场九龙镇（61km · 约1h，县道多弯慢行）</td></tr>
+          <tr><th>16:30</th><td>入住九龙镇经济客栈 · 休整</td></tr>
+          <tr><th>17:30</th><td>晚餐：九龙豆腐农家菜（见美食）</td></tr>
+          <tr><th>可选</th><td>日落前可顺路打卡千军峰林 / 荣强小桂林（九龙镇西南约2km，免费）</td></tr>
+        </table>
+        <div class="dc-meta">
+          <div class="meta-box"><b>今日里程</b><br>深圳→梅子坪 280km / 梅子坪→九龙 61km</div>
+          <div class="meta-box"><b>今日强度</b><br>车程约5h + 徒步约4h，较充实</div>
+          <div class="meta-box"><b>徒步数据</b><br>8km 环线 · 爬升300m · 3.5–4.5h</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="day-card open" data-day="2">
+      <div class="dc-head">
+        <span class="dnum">Day 2</span>
+        <div class="dt">
+          <h3>11月15日 · 周日 · 英西峰林 · 喀斯特画廊</h3>
+          <span class="dd">英德·九龙/黄花镇 — 「英西小桂林」精华徒步线 · 全程免费</span>
+        </div>
+        <span class="chev">▾</span>
+      </div>
+      <div class="dc-body">
+        <table class="tl">
+          <tr><th>08:30</th><td>退房出发 → 黄花镇（9km · 30min），导航「黄花公园」（小赵州桥）</td></tr>
+          <tr><th>09:00</th><td>英西峰林精华徒步开始：约10km，机耕路+乡道，基本无爬升，3.5–5h</td></tr>
+          <tr><th>09:15</th><td>小赵州桥（永丰古桥）：无桥墩古石拱桥 · 蔓藤古意 · 经典机位</td></tr>
+          <tr><th>09:30</th><td>永丰古庙 → 骆驼峰 / 攀岩场 → 茶园 · 乡间小路</td></tr>
+          <tr><th>10:30</th><td>和顺岩：天然穿山岩洞 · 溪流穿洞 · 拍剪影绝佳</td></tr>
+          <tr><th>11:30</th><td>观音谷：群峰环抱 · 奇石「童子拜观音」 · 草坪午餐休整</td></tr>
+          <tr><th>12:30</th><td>返程：观音谷口三轮摩托回黄花公园（约5元/人）或原路折返</td></tr>
+          <tr><th>13:30</th><td>九龙镇午餐（农家菜）</td></tr>
+          <tr><th>15:00</th><td>九龙镇直返深圳（262km · 约4h）</td></tr>
+          <tr><th>19:00</th><td>抵达深圳 · 顺利到家</td></tr>
+        </table>
+        <div class="dc-meta">
+          <div class="meta-box"><b>今日里程</b><br>九龙→黄花 9km / 黄花→深圳 262km</div>
+          <div class="meta-box"><b>今日强度</b><br>徒步约4h（无爬升）+ 车程约4.5h，节奏适中</div>
+          <div class="meta-box"><b>徒步数据</b><br>10km 平路 · 防晒关键 · 3.5–5h</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TRAILS ============ -->
+<section id="trail" style="background:#f0e7d5">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kick">HIKING ROUTES</div>
+      <h2>徒步路线详解</h2>
+      <p>两条徒步线的分段路书 + 海拔剖面 + 轨迹下载提示。出行前务必在「两步路」App 下载对应离线轨迹。</p>
+    </div>
+
+    <div class="trail-card t1">
+      <div class="trail-head">
+        <span class="tn">①</span>
+        <div class="tt">
+          <h3>梅子坪古道 · 精华小环线</h3>
+          <span class="ts">Day 1 · 阳山江英镇上坪村起止 · 全程免费</span>
+        </div>
+        <div class="trail-stats"><span>8–9km</span><span>爬升≈300m</span><span>3.5–4.5h</span><span>最高455m</span><span>难度★☆</span></div>
+      </div>
+      <div class="trail-body">
+        <div class="trail-steps">
+          <ol>
+            <li><b>上坪村起点</b><span class="km">0km · 海拔≈400m · 村口免费停车，热身出发（登山口更近可导「周屋农庄」）</span></li>
+            <li><b>千年青石板古道</b><span class="km">约1.5km · 马蹄印石板路，林荫段，平缓</span></li>
+            <li><b>黑石林核心区</b><span class="km">约3km · 最高点≈455m · 「广东版墨石公园」连片黑石，拍照机位；下坡到梅子坪村</span></li>
+            <li><b>梅子坪村 / 邓公村</b><span class="km">约5km · 补给点（豆腐花/绿豆沙，带现金）；梯田古村、牛羊</span></li>
+            <li><b>梯田观景台 → 返回起点</b><span class="km">约8km · 下山梯田路段，17:00 前回到车旁</span></li>
+          </ol>
+        </div>
+        <div class="trail-profile">
+          <h4>海拔剖面（约）</h4>
+          <svg viewBox="0 0 300 120" role="img" aria-label="梅子坪古道海拔剖面">
+            <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E07B2A" stop-opacity=".5"/><stop offset="1" stop-color="#E07B2A" stop-opacity=".05"/></linearGradient></defs>
+            <polyline points="0,100 37.5,78 75,40 112,18 150,32 188,47 225,63 262,85 300,100" fill="none" stroke="#B4551A" stroke-width="2.5"/>
+            <polygon points="0,100 37.5,78 75,40 112,18 150,32 188,47 225,63 262,85 300,100 300,100 0,100" fill="url(#g1)"/>
+            <text x="2" y="16" font-size="8" fill="#8C7E63">460m</text>
+            <text x="2" y="116" font-size="8" fill="#8C7E63">400m</text>
+            <text x="112" y="10" font-size="9" fill="#B4551A" font-weight="700">黑石林 455m</text>
+            <text x="140" y="116" font-size="8" fill="#8C7E63">0 ───────── 8km</text>
+          </svg>
+          <p class="trail-note">📶 轨迹：两步路搜「清远梅子坪古道」提前下载离线轨迹 · 全程约90%无信号 · 务必带现金</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="trail-card t2">
+      <div class="trail-head">
+        <span class="tn">②</span>
+        <div class="tt">
+          <h3>英西峰林 · 黄花精华线</h3>
+          <span class="ts">Day 2 · 黄花公园起 → 观音谷止 · 全程免费</span>
+        </div>
+        <div class="trail-stats"><span>≈10km</span><span>几乎无爬升</span><span>3.5–5h</span><span>机耕路/乡道</span><span>难度★★☆</span></div>
+      </div>
+      <div class="trail-body">
+        <div class="trail-steps">
+          <ol>
+            <li><b>黄花公园 / 小赵州桥</b><span class="km">0km · 停车场 · 打卡古石拱桥后出发</span></li>
+            <li><b>永丰古庙 → 骆驼峰 / 攀岩场</b><span class="km">约2km · 乡间小路，沿途茶园、田园</span></li>
+            <li><b>和顺岩（穿山岩洞）</b><span class="km">约5km · 1.5–2h · 天然穿洞，溪流穿洞，拍剪影</span></li>
+            <li><b>观音谷</b><span class="km">约7km · +40min · 群峰环抱谷地，草坪午餐休整</span></li>
+            <li><b>返程回黄花公园</b><span class="km">约10km · 观音谷口三轮摩托≈5元/人，或原路折返</span></li>
+          </ol>
+        </div>
+        <div class="trail-profile">
+          <h4>海拔剖面（约）</h4>
+          <svg viewBox="0 0 300 120" role="img" aria-label="英西峰林海拔剖面">
+            <defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3E7C66" stop-opacity=".5"/><stop offset="1" stop-color="#3E7C66" stop-opacity=".05"/></linearGradient></defs>
+            <polyline points="0,92 37,84 75,70 112,74 150,66 187,70 225,62 262,66 300,60" fill="none" stroke="#2E5D4B" stroke-width="2.5"/>
+            <polygon points="0,92 37,84 75,70 112,74 150,66 187,70 225,62 262,66 300,60 300,112 0,112" fill="url(#g2)"/>
+            <text x="2" y="16" font-size="8" fill="#8C7E63">60m</text>
+            <text x="2" y="116" font-size="8" fill="#8C7E63">20m</text>
+            <text x="118" y="56" font-size="9" fill="#2E5D4B" font-weight="700">平缓无爬升</text>
+            <text x="140" y="116" font-size="8" fill="#8C7E63">0 ───────── 10km</text>
+          </svg>
+          <p class="trail-note">☀️ 全程基本无遮荫：防晒帽+墨镜+防晒霜、1.5L水/人 · 观音谷返程可坐三轮车</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SPOTS ============ -->
+<section id="spots">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kick">SPOTS</div>
+      <h2>景点详情</h2>
+      <p>两大徒步地 + 顺路打卡点。点击图片可全屏浏览，点击下方筛选可分类过滤。<br><small style="color:var(--muted)">📷 配图主要来自 B站实拍视频封面（对应景点真实画面，每张注明 UP主）+ 少量 Pexels 美食示意图；版权归原作者，仅作行程参考</small></p>
+    </div>
+    <div class="filters">
+      <button class="on" data-filter="all">全部</button>
+      <button data-filter="nature">自然风光</button>
+      <button data-filter="history">人文历史</button>
+      <button data-filter="food">美食</button>
+      <button data-filter="night">夜景</button>
+    </div>
+
+    <div class="grid">
+
+      <article class="attraction-card" data-stop-id="meiziping" data-cat="nature">
+        <div class="ac-main">
+          <span class="badge">Day 1 · 最佳：上午光线</span>
+          <img src="images/meiziping-1.jpg" alt="梅子坪黑石林" loading="lazy" decoding="async">
+        </div>
+        <div class="thumbs">
+          <img src="images/meiziping-2.jpg" alt="梅子坪古道" loading="lazy" decoding="async">
+          <img src="images/meiziping-3.jpg" alt="阳山石林梅子坪" loading="lazy" decoding="async">
+          <img src="images/meiziping-4.jpg" alt="梅子坪徒步" loading="lazy" decoding="async">
+        </div>
+        <div class="ac-body">
+          <h3>梅子坪古道 <span class="tick">自然风光</span></h3>
+          <div class="ac-tags"><span>8km环线</span><span>爬升300m</span><span>免费</span><span>无信号</span></div>
+          <p>广东目前最大连片黑色喀斯特石林，被誉为「广东版墨石公园」；千年青石板古驿道马蹄印犹在，秋日黄叶配石林如电影画面。</p>
+          <div class="ac-info">
+            <span><b>位置</b> 阳山·江英镇（英德交界）</span>
+            <span><b>门票</b> 免费</span>
+            <span><b>时长</b> 3.5–4.5h</span>
+            <span><b>难度</b> ★☆ 新手友好</span>
+            <span><b>最佳时段</b> 08:00–11:00</span>
+            <span><b>补给</b> 村口小卖部（带现金）</span>
+          </div>
+          <div class="ac-links"><a data-goto="meiziping">看地图位置</a><a href="#days">查当日行程</a></div>
+          <p class="img-credit">📷 图片：B站视频封面 · UP主：留了个白了 / 阿詹帮游 / 英德市精益眼镜 / 是AceLee（版权归原作者）</p>
+        </div>
+      </article>
+
+      <article class="attraction-card" data-stop-id="huanghua" data-cat="history">
+        <div class="ac-main">
+          <span class="badge">Day 2 · 最佳：清晨/傍晚</span>
+          <img src="images/zhaozhou-1.jpg" alt="小赵州桥" loading="lazy" decoding="async">
+        </div>
+        <div class="thumbs">
+          <img src="images/zhaozhou-2.jpg" alt="小赵州桥打卡" loading="lazy" decoding="async">
+          <img src="images/zhaozhou-3.jpg" alt="航拍小赵州桥" loading="lazy" decoding="async">
+          <img src="images/yingxi-1.jpg" alt="英西峰林田园" loading="lazy" decoding="async">
+        </div>
+        <div class="ac-body">
+          <h3>小赵州桥 · 永丰古桥 <span class="tick">人文历史</span></h3>
+          <div class="ac-tags"><span>清代古桥</span><span>无桥墩</span><span>免费</span><span>徒步起点</span></div>
+          <p>按力学原理垒石而成、不用沙浆、无桥墩的古石拱桥，桥身爬满蔓藤，与小河青山构成「小桥流水人家」经典画面。</p>
+          <div class="ac-info">
+            <span><b>位置</b> 英德·黄花镇黄花公园内</span>
+            <span><b>门票</b> 免费</span>
+            <span><b>游玩</b> 0.5h</span>
+            <span><b>导航</b> 黄花公园</span>
+            <span><b>最佳时段</b> 清晨/傍晚</span>
+            <span><b>配套</b> 停车场/公厕</span>
+          </div>
+          <div class="ac-links"><a data-goto="huanghua">看地图位置</a><a href="#days">查当日行程</a></div>
+          <p class="img-credit">📷 图片：B站视频封面 · UP主：起来我带你环游世界 / 阿雷的快乐生活 / Mr-源源 / 吕行清远（版权归原作者）</p>
+        </div>
+      </article>
+
+      <article class="attraction-card" data-stop-id="heshunyan" data-cat="nature">
+        <div class="ac-main">
+          <span class="badge">Day 2 · 徒步约1.5–2h后</span>
+          <img src="images/heshunyan-1.jpg" alt="和顺岩溶洞" loading="lazy" decoding="async">
+        </div>
+        <div class="thumbs">
+          <img src="images/heshunyan-2.jpg" alt="和顺岩溶洞景观" loading="lazy" decoding="async">
+          <img src="images/yingxi-1.jpg" alt="英西峰林" loading="lazy" decoding="async">
+          <img src="images/yingxi-3.jpg" alt="英西峰林露营" loading="lazy" decoding="async">
+        </div>
+        <div class="ac-body">
+          <h3>和顺岩 <span class="tick">自然风光</span></h3>
+          <div class="ac-tags"><span>天然穿洞</span><span>200m</span><span>乡道穿过</span><span>免费</span></div>
+          <p>千万年形成的天然穿山岩洞，长约200米，小溪穿洞而过，一条乡村公路从洞中穿过，是英西峰林徒步必经奇观。</p>
+          <div class="ac-info">
+            <span><b>位置</b> 黄花镇和顺岩村</span>
+            <span><b>门票</b> 免费</span>
+            <span><b>游玩</b> 0.5h</span>
+            <span><b>玩法</b> 洞内拍剪影</span>
+            <span><b>最佳时段</b> 正午穿光</span>
+            <span><b>提示</b> 带走垃圾</span>
+          </div>
+          <div class="ac-links"><a data-goto="heshunyan">看地图位置</a><a href="#days">查当日行程</a></div>
+          <p class="img-credit">📷 图片：B站视频封面 · UP主：数字前置滤波器 / 周华旅行 / 吕行清远 / SummitChallenge（版权归原作者）</p>
+        </div>
+      </article>
+
+      <article class="attraction-card" data-stop-id="guanyingu" data-cat="nature">
+        <div class="ac-main">
+          <span class="badge">Day 2 · 徒步终点</span>
+          <img src="images/yingxi-2.jpg" alt="英西峰林徒步" loading="lazy" decoding="async">
+        </div>
+        <div class="thumbs">
+          <img src="images/yingxi-1.jpg" alt="英西峰林航拍" loading="lazy" decoding="async">
+          <img src="images/yingxi-3.jpg" alt="英西峰林露营" loading="lazy" decoding="async">
+          <img src="images/jiulong-3.jpg" alt="峰林晓镇" loading="lazy" decoding="async">
+        </div>
+        <div class="ac-body">
+          <h3>观音谷 <span class="tick">自然风光</span></h3>
+          <div class="ac-tags"><span>谷地</span><span>奇石</span><span>免费</span><span>草坪休整</span></div>
+          <p>群山环抱中的峰林谷地，有「童子拜观音」天然奇石，草坪开阔适合路餐休整；返程可坐三轮车回黄花公园。</p>
+          <div class="ac-info">
+            <span><b>位置</b> 黄花镇北</span>
+            <span><b>门票</b> 免费</span>
+            <span><b>游玩</b> 1h</span>
+            <span><b>返程</b> 三轮车≈5元/人</span>
+            <span><b>最佳时段</b> 午后</span>
+            <span><b>提示</b> 防晒补水</span>
+          </div>
+          <div class="ac-links"><a data-goto="guanyingu">看地图位置</a><a href="#days">查当日行程</a></div>
+          <p class="img-credit">📷 图片：B站视频封面 · UP主：范范在香港 / 吕行清远 / SummitChallenge / 不知疲倦的四方兄（版权归原作者）</p>
+        </div>
+      </article>
+
+      <article class="attraction-card" data-stop-id="jiulong" data-cat="nature">
+        <div class="ac-main">
+          <span class="badge">Day 1 晚 · 顺路打卡</span>
+          <img src="images/jiulong-1.jpg" alt="英德九龙镇" loading="lazy" decoding="async">
+        </div>
+        <div class="thumbs">
+          <img src="images/jiulong-2.jpg" alt="九龙镇宣传片" loading="lazy" decoding="async">
+          <img src="images/jiulong-3.jpg" alt="峰林晓镇景区" loading="lazy" decoding="async">
+          <img src="images/yingxi-3.jpg" alt="英西峰林露营" loading="lazy" decoding="async">
+        </div>
+        <div class="ac-body">
+          <h3>九龙镇 · 千军峰林 <span class="tick">自然风光</span></h3>
+          <div class="ac-tags"><span>住宿hub</span><span>免费</span><span>日落机位</span><span>九龙豆腐</span></div>
+          <p>英西峰林门户：千军峰林石峰整体向东倾斜如冲锋兵阵；明迳倒影（黄花驿站）可拍峰林倒影，傍晚光线极佳。</p>
+          <div class="ac-info">
+            <span><b>位置</b> 英德市九龙镇</span>
+            <span><b>门票</b> 免费</span>
+            <span><b>游玩</b> 1–1.5h</span>
+            <span><b>住宿</b> 120–200元/间</span>
+            <span><b>最佳时段</b> 傍晚日落</span>
+            <span><b>美食</b> 九龙豆腐(非遗)</span>
+          </div>
+          <div class="ac-links"><a data-goto="jiulong">看地图位置</a><a href="#stay">查看住宿</a></div>
+          <p class="img-credit">📷 图片：B站视频封面 · UP主：吕行清远 / XXZW丶 / 不知疲倦的四方兄 / SummitChallenge（版权归原作者）</p>
+        </div>
+      </article>
+
+      <article class="attraction-card" data-stop-id="sunset" data-cat="night">
+        <div class="ac-main">
+          <span class="badge">Day 1 晚 · 可选</span>
+          <img src="images/yingxi-1.jpg" alt="英西峰林田园日落" loading="lazy" decoding="async">
+        </div>
+        <div class="thumbs">
+          <img src="images/yingxi-2.jpg" alt="英西峰林徒步" loading="lazy" decoding="async">
+          <img src="images/yingxi-3.jpg" alt="英西峰林露营" loading="lazy" decoding="async">
+          <img src="images/jiulong-1.jpg" alt="九龙镇峰林" loading="lazy" decoding="async">
+        </div>
+        <div class="ac-body">
+          <h3>荣强小桂林日落 <span class="tick">夜景</span></h3>
+          <div class="ac-tags"><span>免费</span><span>日落机位</span><span>喀斯特倒影</span></div>
+          <p>九龙镇附近的「小桂林」景观区，傍晚峰林倒影入水，天边渲染金红色，是《英西夕阳恋》金奖摄影取景地。</p>
+          <div class="ac-info">
+            <span><b>位置</b> 九龙镇西南</span>
+            <span><b>门票</b> 免费</span>
+            <span><b>游玩</b> 0.5–1h</span>
+            <span><b>最佳时段</b> 17:00–18:30</span>
+            <span><b>建议</b> 徒步后体力允许再去</span>
+            <span><b>提示</b> 注意安全</span>
+          </div>
+          <div class="ac-links"><a data-goto="jiulong">看地图位置</a><a href="#days">查当日行程</a></div>
+          <p class="img-credit">📷 图片：B站视频封面 · UP主：吕行清远 / 范范在香港 / SummitChallenge（版权归原作者）</p>
+        </div>
+      </article>
+
+      <article class="attraction-card" data-stop-id="food" data-cat="food">
+        <div class="ac-main">
+          <span class="badge">两个晚上 · 农家菜</span>
+          <img src="https://images.pexels.com/photos/15177422/pexels-photo-15177422.jpeg?auto=compress&cs=tinysrgb&w=800" alt="九龙豆腐农家菜" loading="lazy" decoding="async">
+        </div>
+        <div class="thumbs">
+          <img src="https://images.pexels.com/photos/20943933/pexels-photo-20943933.jpeg?auto=compress&cs=tinysrgb&w=400" alt="农家餐" loading="lazy" decoding="async">
+          <img src="https://images.pexels.com/photos/16143083/pexels-photo-16143083.jpeg?auto=compress&cs=tinysrgb&w=400" alt="豆腐煲" loading="lazy" decoding="async">
+          <img src="https://images.pexels.com/photos/36810327/pexels-photo-36810327.jpeg?auto=compress&cs=tinysrgb&w=400" alt="山野田园" loading="lazy" decoding="async">
+        </div>
+        <div class="ac-body">
+          <h3>九龙豆腐 · 清远鸡 <span class="tick">美食</span></h3>
+          <div class="ac-tags"><span>九龙豆腐(非遗)</span><span>清远走地鸡</span><span>山坑螺</span><span>腐竹手信</span></div>
+          <p>九龙豆腐水嫩清甜是必尝招牌；清远鸡白切/柴火焖煮肉质紧实；山坑螺、河煎小鱼仔下饭；腐竹可作手信。</p>
+          <div class="ac-info">
+            <span><b>推荐</b> 九龙镇农家菜馆</span>
+            <span><b>人均</b> 40–50元/餐</span>
+            <span><b>补给</b> 上坪村豆腐花5元</span>
+            <span><b>手信</b> 腐竹/菜心</span>
+          </div>
+          <div class="ac-links"><a href="#food">查看更多美食</a></div>
+          <p class="img-credit">📷 图片：Pexels（农家菜 / 美食示意图，版权归原作者）</p>
+        </div>
+      </article>
+
+      <article class="attraction-card" data-stop-id="dongtian" data-cat="nature">
+        <div class="ac-main">
+          <span class="badge">可选 · 自费</span>
+          <img src="images/dongtian-1.jpg" alt="洞天仙境" loading="lazy" decoding="async">
+        </div>
+        <div class="thumbs">
+          <img src="images/dongtian-2.jpg" alt="洞天仙境九龙镇" loading="lazy" decoding="async">
+          <img src="images/heshunyan-2.jpg" alt="溶洞景观" loading="lazy" decoding="async">
+          <img src="images/heshunyan-1.jpg" alt="和顺岩溶洞" loading="lazy" decoding="async">
+        </div>
+        <div class="ac-body">
+          <h3>洞天仙境 · 穿天岩 <span class="tick">自然风光</span></h3>
+          <div class="ac-tags"><span>4A景区</span><span>船游</span><span>门票≈85元</span><span>可选</span></div>
+          <p>溪流穿山而过的岩洞，洞顶有2个穿孔通天，船游约200米，洞内阴生小森林罕见奇观。预算紧张可门口打卡即可。</p>
+          <div class="ac-info">
+            <span><b>位置</b> 九龙镇西约2km</span>
+            <span><b>门票</b> ≈85元</span>
+            <span><b>游玩</b> 1.5h</span>
+            <span><b>开放</b> 08:30–18:00</span>
+            <span><b>购票</b> 携程/美团/现场</span>
+            <span><b>建议</b> 时间富余再去</span>
+          </div>
+          <div class="ac-links"><a data-goto="dongtian">看地图位置</a><a href="#budget">查看预算</a></div>
+          <p class="img-credit">📷 图片：B站视频封面 · UP主：顺德无骨鱼 / 木头人哆嘞咪 / 周华旅行 / 数字前置滤波器（版权归原作者）</p>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ STAY ============ -->
+<section id="stay" style="background:#f0e7d5">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kick">STAY</div>
+      <h2>住宿推荐</h2>
+      <p>经济实惠为主，住九龙镇（餐饮方便、离徒步起点黄花镇仅30分钟）。</p>
+    </div>
+    <div class="simple-grid">
+      <div class="simple-card">
+        <h3>Day 1 · 英德市九龙镇</h3>
+        <ul>
+          <li>经济型客栈 / 宾馆 / 民宿</li>
+          <li>参考价：120–200 元/间（旺季）</li>
+          <li>5 人建议 3 间；预算紧张可 2 间拼住</li>
+          <li>选址：九龙大道 / 桥头酒店附近，步行到餐饮街</li>
+        </ul>
+        <p class="note">备选：黄花镇民宿（离徒步起点更近，但餐饮与选择少）。11月中为徒步旺季，建议提前1周在携程/美团预订并电话确认。</p>
+      </div>
+      <div class="simple-card">
+        <h3>预订提示</h3>
+        <ul>
+          <li>确认可免费停车 / 有停车位</li>
+          <li>旺季周六入住，越早订越便宜</li>
+          <li>带好身份证办理入住</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOD ============ -->
+<section id="food">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kick">FOOD</div>
+      <h2>美食推荐</h2>
+      <p>徒步之余，尝遍粤北农家味道。</p>
+    </div>
+    <div class="simple-grid">
+      <div class="simple-card">
+        <h3>九龙镇（英西峰林）</h3>
+        <ul>
+          <li>九龙豆腐（非遗）：水嫩清甜，必尝「豆腐煲」</li>
+          <li>清远走地鸡：白切 / 柴火焖煮，肉质紧实</li>
+          <li>山坑螺 / 河煎小鱼仔：下饭下酒</li>
+          <li>腐竹：当地特产，可作手信</li>
+        </ul>
+      </div>
+      <div class="simple-card">
+        <h3>梅子坪古道沿途</h3>
+        <ul>
+          <li>上坪村/梅子坪村小卖部：山水豆腐花、绿豆沙、菜包（约5元，带现金）</li>
+          <li>终点邓公村周边农庄：清远鸡、农家土菜</li>
+        </ul>
+      </div>
+      <div class="simple-card">
+        <h3>徒步路餐建议</h3>
+        <ul>
+          <li>自备：全麦面包、能量棒、坚果、香蕉、牛肉干</li>
+          <li>每人 1.5–2L 水（梅子坪山中补给有限）</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BUDGET ============ -->
+<section id="budget" style="background:#f0e7d5">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kick">BUDGET</div>
+      <h2>预算估算</h2>
+      <p>点击类别可勾选/取消，实时重算合计与人均（5人 · 1车 · 3间房基准）。</p>
+    </div>
+    <div class="budget-box">
+      <div class="b-total">
+        <span class="amt" id="totalAmt">0</span><span class="unit">元</span>
+        <span class="per">人均 <b id="perAmt">0</b> 元 · 目标 ≤300/人</span>
+        <span id="budgetStatus" style="font-size:.85rem"></span>
+      </div>
+      <div class="b-row"><input type="checkbox" checked data-key="oil"><span class="bname">油费</span><div class="bar-wrap"><div class="bar" id="bar-oil" style="background:var(--day1);width:100%"></div></div><span class="bval" id="val-oil">360</span></div>
+      <div class="b-row"><input type="checkbox" checked data-key="toll"><span class="bname">高速过路费</span><div class="bar-wrap"><div class="bar" id="bar-toll" style="background:var(--day1-deep);width:100%"></div></div><span class="bval" id="val-toll">330</span></div>
+      <div class="b-row"><input type="checkbox" checked data-key="stay"><span class="bname">住宿(3间)</span><div class="bar-wrap"><div class="bar" id="bar-stay" style="background:var(--clay);width:100%"></div></div><span class="bval" id="val-stay">450</span></div>
+      <div class="b-row"><input type="checkbox" checked data-key="food"><span class="bname">餐饮</span><div class="bar-wrap"><div class="bar" id="bar-food" style="background:var(--day2);width:100%"></div></div><span class="bval" id="val-food">550</span></div>
+      <div class="b-row"><input type="checkbox" checked data-key="misc"><span class="bname">其他(补给/保险)</span><div class="bar-wrap"><div class="bar" id="bar-misc" style="background:var(--muted);width:100%"></div></div><span class="bval" id="val-misc">100</span></div>
+      <p class="b-hint">* 门票 0 元：两条徒步线均免费。省钱版：住宿改2间(-150)、正餐简化为自带干粮+2顿农家菜(-150)，可压到人均≈300元。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TIPS ============ -->
+<section id="tips">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kick">TIPS</div>
+      <h2>出行贴士</h2>
+      <p>装备、天气、安全一个都不能少。</p>
+    </div>
+    <div class="tips-grid">
+      <div class="tip"><span class="ti">🌤️</span><h3>天气</h3><p>11月中旬15–25℃，昼夜温差大。出发前查「阳山」「英德」预报；有雨则梅子坪石板路湿滑，改期或改走英西峰林。带轻便雨衣。</p></div>
+      <div class="tip"><span class="ti">🚗</span><h3>交通</h3><p>广深/京港澳→广清高速→清连高速→阳山段；进村最后一段窄路会车慢行；梅子坪→九龙为县道多弯；18:00后山区天黑快。</p></div>
+      <div class="tip"><span class="ti">🥾</span><h3>装备</h3><p>防滑徒步鞋（青石板湿滑）、登山杖、护膝、防晒帽+墨镜+防晒霜、驱蚊液、1.5–2L水/人、头灯、薄外套、充电宝。</p></div>
+      <div class="tip"><span class="ti">📶</span><h3>信号</h3><p>梅子坪90%路段无信号：提前在「两步路」下载「清远梅子坪古道」离线轨迹；下载离线地图；山中补给只收现金。</p></div>
+      <div class="tip"><span class="ti">♻️</span><h3>环保安全</h3><p>无痕山野垃圾带走；不攀爬石林；不采野果；结伴不落单；秋冬草木干燥禁止野外生火；不踩踏千年古道石板。</p></div>
+      <div class="tip"><span class="ti">🚨</span><h3>应急</h3><p>报警110 / 急救120；行程告知家人；迷路原地等待保电量；梅子坪起点上坪村党群服务中心可求助；建议购买户外运动险。</p></div>
+    </div>
+
+    <div class="checklist">
+      <h3>📋 出行前清单 <span class="pct" id="clPct">0% 完成</span></h3>
+      <div class="cl-grid">
+        <label><input type="checkbox" data-cl="证件身份证驾照">身份证 / 驾驶证 / 行驶证</label>
+        <label><input type="checkbox" data-cl="两步路离线轨迹">「两步路」下载梅子坪离线轨迹</label>
+        <label><input type="checkbox" data-cl="现金">现金（山中补给只收现金）</label>
+        <label><input type="checkbox" data-cl="徒步鞋">每人一双防滑徒步鞋</label>
+        <label><input type="checkbox" data-cl="登山杖">登山杖 / 护膝</label>
+        <label><input type="checkbox" data-cl="防晒">防晒帽 + 墨镜 + 防晒霜</label>
+        <label><input type="checkbox" data-cl="驱蚊">驱蚊液</label>
+        <label><input type="checkbox" data-cl="雨具">轻便雨衣 / 伞</label>
+        <label><input type="checkbox" data-cl="饮水">1.5–2L 水/人 + 路餐干粮</label>
+        <label><input type="checkbox" data-cl="头灯">头灯 / 手电筒</label>
+        <label><input type="checkbox" data-cl="外套">薄外套（山区温差）</label>
+        <label><input type="checkbox" data-cl="加满油">出发前加满油</label>
+        <label><input type="checkbox" data-cl="查天气">查阳山/英德天气预报</label>
+        <label><input type="checkbox" data-cl="订住宿">提前预订九龙镇住宿</label>
+        <label><input type="checkbox" data-cl="户外险">购买户外运动意外险</label>
+        <label><input type="checkbox" data-cl="告知家人">行程告知家人</label>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ REFS ============ -->
+<section id="refs" style="background:#f0e7d5">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kick">REFERENCES</div>
+      <h2>参考资料</h2>
+    </div>
+    <div class="refs">
+      <ol>
+        <li>景点信息：Trip.com 阳山/英德游记 · 什么值得买《清远梅子坪古道攻略》 · 两步路社区《英德梅子坪穿越阳山江英古道》 · 磨房《英西峰林徒步和阳岩洞攻略》 · 中新网《广东梅子坪：千年古道穿石林》</li>
+        <li>坐标：Wikipedia（江英镇、大湾镇）· 高德 POI（九龙镇、小赵州桥）</li>
+        <li>里程/车程：OSRM 开源路由 API 实测验证（深圳→梅子坪 280km/4h · 梅子坪→九龙 61km/1h · 九龙→黄花 9km/30min · 九龙→深圳 262km/4h），实际按 +25%~30% 缓冲</li>
+        <li>天气：清远气候资料 · 2026 年 11 月阳山/英德预报参考</li>
+        <li>图片来源：HTML 配图主要为 B站实拍视频封面（对应景点真实画面，已标注 UP主），下载于本地 images/ 文件夹；另含少量 Pexels 美食示意图；版权归原作者</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="ff">山野两日 · 清远</div>
+  <p>本攻略为信息整合与路线规划参考，徒步属户外活动存在风险；请根据队员体能、天气与路况自行判断调整，安全第一。祝徒步愉快，满载秋色而归！</p>
+</footer>
+
+<!-- ============ LIGHTBOX ============ -->
+<div id="lightbox">
+  <button class="close" data-lb="close">✕</button>
+  <button class="nav prev" data-lb="prev">‹</button>
+  <img id="lbImg" alt="">
+  <div class="cap" id="lbCap"></div>
+  <button class="nav next" data-lb="next">›</button>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function(){
+  "use strict";
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+
+  /* ---------- 日切换 ---------- */
+  let curDay = 1;
+  const dayCards = $$('.day-card');
+  const chains = $$('.chain');
+  const svgRoutes = $$('[data-route-day]');
+  function setDay(n){
+    curDay = n;
+    $('#dayLabel').textContent = 'Day ' + n;
+    $$('.day-dots span').forEach(d => d.classList.toggle('on', +d.dataset.dayDot === n));
+    dayCards.forEach(c => c.classList.toggle('is-current', +c.dataset.day === n));
+    chains.forEach(ch => ch.classList.toggle('is-muted', +ch.dataset.day !== n));
+    svgRoutes.forEach(l => l.classList.toggle('is-dimmed', +l.dataset.routeDay !== n));
+    updateMapDay(n);
+    const target = dayCards.find(c => +c.dataset.day === n);
+    if(target) target.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+  $('#dayPrev').addEventListener('click', () => setDay(curDay === 1 ? 2 : 1));
+  $('#dayNext').addEventListener('click', () => setDay(curDay === 2 ? 1 : 2));
+  $$('.day-dots span').forEach(d => d.addEventListener('click', () => setDay(+d.dataset.dayDot)));
+
+  /* 展开/收起 */
+  $$('.day-card').forEach(card => {
+    const head = card.querySelector('.dc-head');
+    head.addEventListener('click', () => card.classList.toggle('open'));
+  });
+
+  /* ---------- 视图切换 ---------- */
+  $$('.view-tabs button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      $$('.view-tabs button').forEach(b => b.classList.toggle('on', b === btn));
+      const v = btn.dataset.view;
+      $$('.view-panel').forEach(p => p.classList.toggle('on', p.id === 'panel-' + v));
+      if(v === 'map') initMap();
+    });
+  });
+
+  /* ---------- 景点筛选 ---------- */
+  let activeFilter = 'all';
+  $$('.filters button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      $$('.filters button').forEach(b => b.classList.toggle('on', b === btn));
+      activeFilter = btn.dataset.filter;
+      applyFilter();
+    });
+  });
+  function applyFilter(){
+    $$('.attraction-card').forEach(card => {
+      const cats = (card.dataset.cat || '').split(' ');
+      const show = activeFilter === 'all' || cats.includes(activeFilter);
+      card.classList.toggle('is-hidden', !show);
+    });
+    if(map){
+      Object.keys(markers).forEach(id => {
+        const el = markers[id];
+        const cats = el.options.markerCats || [];
+        const show = activeFilter === 'all' || cats.includes(activeFilter);
+        el.getElement().style.display = show ? '' : 'none';
+      });
+    }
+  }
+
+  /* ---------- 视图联动 ---------- */
+  function highlightStop(id){
+    $$(`[data-stop-id="${id}"]`).forEach(n => n.classList.add('is-active'));
+    if(markers[id] && markers[id].getElement()) markers[id].getElement().classList.add('is-active');
+  }
+  function clearHighlight(){
+    $$('.is-active').forEach(n => n.classList.remove('is-active'));
+  }
+  function focusStop(id){
+    clearHighlight();
+    highlightStop(id);
+    const card = $(`.attraction-card[data-stop-id="${id}"]`);
+    if(card) card.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+  $$('[data-stop-id]').forEach(el => {
+    el.addEventListener('mouseenter', () => { clearHighlight(); highlightStop(el.dataset.stopId); });
+    el.addEventListener('mouseleave', clearHighlight);
+    el.addEventListener('click', () => focusStop(el.dataset.stopId));
+  });
+  $$('[data-goto]').forEach(a => {
+    a.addEventListener('click', e => { e.preventDefault(); focusStop(a.dataset.goto); });
+  });
+
+  /* ---------- 预算 ---------- */
+  const budgetItems = {
+    oil:360, toll:330, stay:450, food:550, misc:100
+  };
+  const target = 300 * 5;
+  function calcBudget(){
+    let total = 0;
+    $$('.budget-box input[data-key]').forEach(cb => {
+      if(cb.checked) total += budgetItems[cb.dataset.key];
+      const bar = $('#bar-' + cb.dataset.key);
+      if(bar) bar.style.width = (cb.checked ? 100 : 12) + '%';
+      const val = $('#val-' + cb.dataset.key);
+      if(val) val.style.opacity = cb.checked ? 1 : .35;
+    });
+    $('#totalAmt').textContent = total;
+    $('#perAmt').textContent = Math.round(total / 5);
+    const per = Math.round(total / 5);
+    const st = $('#budgetStatus');
+    if(total === 0){ st.textContent = ''; }
+    else if(per <= 300){ st.innerHTML = '✅ 达标（≤300/人）'; st.style.color = 'var(--day2)'; }
+    else if(per <= 350){ st.innerHTML = '⚠️ 略超（可在 300 内：住宿2间 / 自带路餐）'; st.style.color = 'var(--day1-deep)'; }
+    else { st.innerHTML = '🔴 超支，建议精简'; st.style.color = '#b3261e'; }
+  }
+  $$('.budget-box input[data-key]').forEach(cb => cb.addEventListener('change', calcBudget));
+  calcBudget();
+
+  /* ---------- 清单 ---------- */
+  const CL_KEY = 'qx-checklist-v1';
+  const clBoxes = $$('[data-cl]');
+  let clStore = {};
+  try { clStore = JSON.parse(localStorage.getItem(CL_KEY) || '{}'); } catch(e){ clStore = {}; }
+  clBoxes.forEach(cb => {
+    cb.checked = !!clStore[cb.dataset.cl];
+    cb.addEventListener('change', () => {
+      clStore[cb.dataset.cl] = cb.checked;
+      try { localStorage.setItem(CL_KEY, JSON.stringify(clStore)); } catch(e){}
+      updateClPct();
+    });
+    cb.closest('label').classList.toggle('done', cb.checked);
+  });
+  function updateClPct(){
+    const done = clBoxes.filter(c => c.checked).length;
+    $('#clPct').textContent = Math.round(done / clBoxes.length * 100) + '% 完成';
+    clBoxes.forEach(c => c.closest('label').classList.toggle('done', c.checked));
+  }
+  updateClPct();
+
+  /* ---------- Lightbox ---------- */
+  const lb = $('#lightbox'), lbImg = $('#lbImg'), lbCap = $('#lbCap');
+  let lbList = [], lbIdx = 0;
+  function openLb(list, idx, name){
+    lbList = list; lbIdx = idx;
+    lbImg.src = list[idx].src;
+    lbCap.textContent = name + ' · ' + (idx+1) + ' / ' + list.length;
+    lb.classList.add('open');
+  }
+  function lbShow(){
+    lbImg.src = lbList[lbIdx].src;
+    lbCap.textContent = lbCap.textContent.split(' · ')[0] + ' · ' + (lbIdx+1) + ' / ' + lbList.length;
+  }
+  $$('.attraction-card').forEach(card => {
+    const imgs = Array.from(card.querySelectorAll('img')).filter(i => i.closest('.ac-main,.thumbs'));
+    const name = card.querySelector('h3') ? card.querySelector('h3').textContent : '';
+    imgs.forEach((img, i) => {
+      img.addEventListener('click', () => openLb(imgs, i, name));
+    });
+  });
+  $('#lightbox [data-lb="close"]').addEventListener('click', () => lb.classList.remove('open'));
+  $('#lightbox [data-lb="prev"]').addEventListener('click', () => { lbIdx = (lbIdx - 1 + lbList.length) % lbList.length; lbShow(); });
+  $('#lightbox [data-lb="next"]').addEventListener('click', () => { lbIdx = (lbIdx + 1) % lbList.length; lbShow(); });
+  document.addEventListener('keydown', e => {
+    if(!lb.classList.contains('open')) return;
+    if(e.key === 'Escape') lb.classList.remove('open');
+    if(e.key === 'ArrowLeft'){ lbIdx = (lbIdx - 1 + lbList.length) % lbList.length; lbShow(); }
+    if(e.key === 'ArrowRight'){ lbIdx = (lbIdx + 1) % lbList.length; lbShow(); }
+  });
+  lb.addEventListener('click', e => { if(e.target === lb) lb.classList.remove('open'); });
+
+  /* ---------- Leaflet ---------- */
+  let map = null, markers = {}, polylines = {};
+  function initMap(){
+    if(map) return;
+    if(typeof L === 'undefined'){ $('#map').innerHTML = '<p style="padding:2rem;text-align:center;color:#55503f">地图组件加载失败（需联网访问 CDN），请检查网络后刷新。</p>'; return; }
+    try {
+    map = L.map('map').setView([23.9, 113.1], 8);
+    /* 多瓦片源 + 自动回退：优先高德路网（中文标注），若瓦片加载失败或超时自动切换下一源 */
+    const tileProviders = [
+      { name:'amap', label:'高德路网',
+        url:'https://wprd0{s}.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=1&style=7',
+        subdomains:'1234', attr:'&copy; 高德地图', maxNative:17 },
+      { name:'esri', label:'卫星影像',
+        url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        subdomains:'', attr:'&copy; Esri World Imagery', maxNative:18 },
+      { name:'topo', label:'地形图',
+        url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+        subdomains:'', attr:'&copy; Esri World Topo', maxNative:18 },
+      { name:'carto', label:'经典地形',
+        url:'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+        subdomains:'abcd', attr:'&copy; OpenStreetMap &copy; CARTO', maxNative:19 },
+      { name:'osm', label:'OSM 标准',
+        url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+        subdomains:'', attr:'&copy; OpenStreetMap', maxNative:19 }
+    ];
+    let baseLayer = null, baseFail = 0, watchTimer = null, tileSeen = 0, triedSet = new Set();
+    function addBase(pid){
+      const p = tileProviders.find(x => x.name === pid) || tileProviders[0];
+      if(baseLayer) map.removeLayer(baseLayer);
+      baseFail = 0; tileSeen = 0;
+      if(watchTimer){ clearTimeout(watchTimer); watchTimer = null; }
+      baseLayer = L.tileLayer(p.url, {
+        attribution: p.attr, maxZoom: 18, maxNativeZoom: p.maxNative,
+        detectRetina: false, subdomains: p.subdomains || 'abc'
+      }).addTo(map);
+      baseLayer.on('tileload', () => { tileSeen++; triedSet.clear(); const off = document.getElementById('mapOffline'); if(off) off.hidden = true; });
+      baseLayer.on('tileerror', () => { baseFail++; if(baseFail >= 3){ advance(); } });
+      /* 看门狗：7 秒内没有任何瓦片加载成功 → 自动换源（处理“挂起但不报错”的情况） */
+      watchTimer = setTimeout(() => {
+        if(tileSeen === 0){ advance(); }
+      }, 7000);
+      function advance(){
+        if(watchTimer){ clearTimeout(watchTimer); watchTimer = null; }
+        triedSet.add(p.name);
+        if(triedSet.size >= tileProviders.length){
+          const off = document.getElementById('mapOffline');
+          if(off) off.hidden = false;
+          return;
+        }
+        const idx = tileProviders.findIndex(x => x.name === p.name);
+        const next = tileProviders[(idx + 1) % tileProviders.length];
+        setBasemap(next.name);
+      }
+      return p;
+    }
+    function setBasemap(pid){
+      const p = addBase(pid);
+      $$('.basemap-switch button').forEach(b => b.classList.toggle('on', b.dataset.basemap === p.name));
+    }
+    $$('.basemap-switch button').forEach(b => b.addEventListener('click', () => setBasemap(b.dataset.basemap)));
+    addBase('amap');
+
+    const stops = [
+      {id:'shenzhen', name:'深圳', day:1, lon:114.0579, lat:22.5431, color:'#23251E', num:'S', cats:['nature'], blurb:'出发 / 返程 · 全程起点', img:'images/yingxi-1.jpg'},
+      {id:'meiziping', name:'梅子坪古道', day:1, lon:112.900, lat:24.420, color:'#E07B2A', num:'1', cats:['nature'], blurb:'广东版墨石公园 · 8km环线', img:'images/meiziping-1.jpg'},
+      {id:'jiulong', name:'九龙镇', day:1, lon:112.920, lat:24.130, color:'#E07B2A', num:'2', cats:['nature','food'], blurb:'住宿 hub · 九龙豆腐', img:'images/jiulong-1.jpg'},
+      {id:'huanghua', name:'黄花镇·小赵州桥', day:2, lon:112.9115, lat:24.2027, color:'#3E7C66', num:'3', cats:['history'], blurb:'英西峰林精华徒步起点', img:'images/zhaozhou-1.jpg'},
+      {id:'heshunyan', name:'和顺岩', day:2, lon:112.905, lat:24.222, color:'#3E7C66', num:'4', cats:['nature'], blurb:'天然穿山岩洞 · 溪流穿洞', img:'images/heshunyan-1.jpg'},
+      {id:'guanyingu', name:'观音谷', day:2, lon:112.893, lat:24.242, color:'#3E7C66', num:'5', cats:['nature'], blurb:'群峰环抱 · 徒步终点', img:'images/yingxi-2.jpg'}
+    ];
+
+    stops.forEach(s => {
+      const icon = L.divIcon({
+        className:'leaflet-div-icon',
+        html: `<div class="mk" style="color:${s.color}"><span class="ring"></span><span class="dot" style="background:${s.color}">${s.num}</span></div>`
+      });
+      const m = L.marker([s.lat, s.lon], {icon}).addTo(map);
+      m.markerCats = s.cats;
+      m.bindPopup(
+        `<b>${s.name}</b><br><small>Day ${s.day} · ${s.blurb}</small><br><img src="${s.img}" style="width:150px;border-radius:8px;margin-top:6px" alt="${s.name}">`
+      );
+      m.on('click', () => focusStop(s.id));
+      m.on('mouseover', () => { clearHighlight(); highlightStop(s.id); });
+      m.on('mouseout', clearHighlight);
+      markers[s.id] = m;
+      m.getElement().dataset.stopId = s.id;
+    });
+
+    const mkPos = id => markers[id].getLatLng();
+    function mkPoly(pts, color, weight, on, off, dash){
+      const l = L.polyline(pts, {color, weight, opacity: on, dashArray: dash});
+      l.opacityOn = on; l.opacityOff = off;
+      l.addTo(map);
+      return l;
+    }
+    /* 自驾车程：橙=Day1 / 绿=Day2 */
+    const d1  = mkPoly([mkPos('shenzhen'), mkPos('meiziping'), mkPos('jiulong')], '#E07B2A', 6, .22, .05);
+    const d1b = mkPoly([mkPos('shenzhen'), mkPos('meiziping'), mkPos('jiulong')], '#E07B2A', 2.5, .9, .06);
+    const d2  = mkPoly([mkPos('jiulong'), mkPos('huanghua'), mkPos('shenzhen')], '#3E7C66', 6, .22, .05);
+    const d2b = mkPoly([mkPos('jiulong'), mkPos('huanghua'), mkPos('shenzhen')], '#3E7C66', 2.5, .9, .06);
+    /* 徒步轨迹（示意，依据路书方位）红虚线 */
+    const t1a = mkPoly([[24.420,112.900],[24.433,112.912],[24.436,112.928],[24.428,112.938],[24.416,112.922],[24.410,112.905],[24.420,112.900]], '#fff', 5, .5, .12, '10 8');
+    const t1b = mkPoly([[24.420,112.900],[24.433,112.912],[24.436,112.928],[24.428,112.938],[24.416,112.922],[24.410,112.905],[24.420,112.900]], '#E74C3C', 2, .95, .12, '10 8');
+    const t2a = mkPoly([[24.2027,112.9115],[24.208,112.908],[24.212,112.906],[24.218,112.905],[24.222,112.905],[24.232,112.898],[24.242,112.893]], '#fff', 5, .5, .12, '10 8');
+    const t2b = mkPoly([[24.2027,112.9115],[24.208,112.908],[24.212,112.906],[24.218,112.905],[24.222,112.905],[24.232,112.898],[24.242,112.893]], '#E74C3C', 2, .95, .12, '10 8');
+    polylines = {1:[d1,d1b,t1a,t1b], 2:[d2,d2b,t2a,t2b]};
+    updateMapDay(curDay);
+    map.fitBounds(L.latLngBounds(stops.map(s => [s.lat, s.lon])));
+    requestAnimationFrame(() => map.invalidateSize());
+    } catch(err) {
+      $('#map').innerHTML = '<p style="padding:2rem;text-align:center;color:#55503f">地图初始化失败：' + (err && err.message || err) + '</p>';
+    }
+  }
+  function updateMapDay(n){
+    if(!map) return;
+    Object.keys(polylines).forEach(d => {
+      polylines[d].forEach(l => l.setStyle({opacity: +d === n ? l.opacityOn : l.opacityOff}));
+    });
+  }
+})();
+</script>
+</body>
+</html>

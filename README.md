@@ -16,6 +16,7 @@ Codex, Cursor, OpenCode, and cc-switch**.
 | `agent-reach` | Multi-platform research / search skill (15 platforms: X, xiaohongshu, bilibili, Reddit, V2EX, GitHub, YouTube, RSS, …) with backend routing | Original |
 | `travel-guide` | 自驾游 / 徒步攻略生成器 — immersive interactive road-trip guide: three route views (chain / SVG / Leaflet with multi-tile fallback), hiking trail details with elevation profiles, real on-location photos with attribution, interactive budget & checklist, and an **offline single-file shareable HTML** (images inlined as base64) | Original |
 | `paper-search` | Literature search across OpenAlex / arXiv / PubMed / Crossref, dedup & relevance filtering, exports BibTeX, imports into a Zotero subcollection | Original |
+| `paper-replication` | Paper replication planner — scaffolds a full phased replication project (`INSTRUCTIONS.md`, `AGENTS.md`, `00_setup.py`, directory layout) with anti-hallucination rules and a final replication report | Original |
 | `sync-docs` | Synchronize content across slides, speaker script, and manuscript; audits stale references and compiles to PDF | Original |
 | `open-kimi-ppt` | Create/edit/export presentations using the PPTD format and a local PPTX writer | Third-party (MIT) |
 | `scansci-pdf` | Academic PDF retrieval: search, DOI validation, citation export, open-access/institutional routes | Third-party (Apache-2.0, modified) |
@@ -41,6 +42,7 @@ agent-skills/
     ├── agent-reach/            # SKILL.md + references/
     ├── travel-guide/           # SKILL.md + references/ + scripts/ + examples/
     ├── paper-search/           # SKILL.md + scripts/
+    ├── paper-replication/      # SKILL.md (replication project scaffolder)
     ├── sync-docs/
     ├── open-kimi-ppt/          # SKILL.md + reference/ + scripts/ + tests/
     ├── scansci-pdf/            # SKILL.md + references/ (modified)

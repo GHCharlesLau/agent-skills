@@ -15,6 +15,8 @@
 | 4 | CARTO Voyager | `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png` | WGS84 | 常被墙，备用 |
 | 5 | OpenStreetMap | `https://tile.openstreetmap.org/{z}/{x}/{y}.png` | WGS84 | 常被墙，备用 |
 
+> 海外行程默认用 **Esri 卫星/地形（WGS84）**；高德/腾讯是 GCJ-02，海外不要混用。
+
 ```javascript
 const tileProviders = [
   { name:'amap',  label:'高德路网',  url:'https://wprd0{s}.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=1&style=7', subdomains:'1234', attr:'&copy; 高德地图', maxNative:17 },

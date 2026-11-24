@@ -30,8 +30,8 @@ python scripts/probe_sources.py
 ```
 ① 本地实拍（用户提供 / 已下载到 images/）        —— 最真实
 ② B 站旅行 vlog 封面（拍摄地即景点本身）          —— 中国景点首选
-③ Pexels / Unsplash（按英文关键词搜索）           —— 通用风光，必须核对是否像
-④ Wikimedia Commons                              —— 国外景点、地标建筑
+③ Wikimedia Commons                              —— 海外景点、地标建筑首选
+④ Pexels / Unsplash（按英文关键词搜索）           —— 通用风光，必须核对是否像
 ⑤ picsum（随机图）                                —— 仅占位，且必须标注"示意图"
 ```
 
@@ -82,6 +82,14 @@ python scripts/download_bili_covers.py --manifest images.json --out-dir images
 - 只作补充，不要作为唯一图源
 
 ---
+
+## 5.5 海外景点（Wikimedia Commons）
+
+- 海外地标优先 Wikimedia Commons：`action=query&generator=search&gsrnamespace=6&prop=imageinfo&iiurlwidth=1280`。
+- 429 时限速退避（10–20s），按标准宽度 640/1280 重试；不要请求 1400 这类非标准宽度。
+- `credits.json` 记录 `title / author / license / descriptionurl`。
+- 下载后必须 `read` 肉眼确认；标题对、图不对很常见（搜 Córdoba 返回 Alhambra）。
+- 无可靠图时允许无图卡片并注明，不得用相近景点冒充。
 
 ## 6. 图片落地与命名
 

@@ -7,6 +7,7 @@ All notable changes to this skill collection are recorded here, following
 
 ### Changed
 
+- `travel-guide`: v2 upgrade after a 12-day Spain/Portugal rail trip. Adds a blocking **Gate 0** intake (passport/visa, fixed dates + booked flights, party, budget basis, must-see cities, transport mode), a **source policy** (Trip.com + Xiaohongshu/Rednote via `agent-reach`; official operators for hard facts), **mode-aware mileage** (OSRM only for road; operator km for rail), overseas image/map rules, and a **change-control** SOP for date/flight changes. New `references/sources.md`, `references/change-control.md`, `references/overseas.md`, and `scripts/probe_trip_xhs.py`; QA now checks anchors, day-count consistency and stale dates.
 - `travel-guide`: major upgrade based on a real end-to-end run (清远梅子坪古道 +
   英西峰林). The skill is now a full toolkit rather than a single prompt:
   - **references/** — `images.md` (multi-source image strategy, Bilibili cover
